@@ -495,13 +495,175 @@ html, body {
 /* ── PRINT ────────────────────────── */
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  #sidebar, #section-header { display: none !important; }
-  #app { display: block; height: auto; overflow: visible; }
-  #main { display: block; overflow: visible; }
-  #content-scroll { overflow: visible; padding: 16px; }
-  .status-btn { display: none; }
-  body { font-size: 12px; }
+  #app { display: none !important; }
+  #print-view { display: block !important; }
 }
+
+/* Print view (hidden on screen) */
+#print-view {
+  display: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #1A2340;
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.pv-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 3px solid #142878;
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+}
+.pv-header-left .pv-co {
+  font-family: 'Sora', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #00A0DC;
+  margin-bottom: 3px;
+}
+.pv-header-left .pv-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #142878;
+}
+.pv-header-right {
+  text-align: right;
+  font-size: 11px;
+  color: #5A6482;
+  line-height: 1.8;
+}
+.pv-prop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 20px;
+  background: #F7F8FC;
+  border: 1px solid #DDE3F0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.pv-prop-field label {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9AA3BA;
+  margin-bottom: 2px;
+}
+.pv-prop-field .pv-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A2340;
+}
+.pv-section { margin-bottom: 22px; page-break-inside: avoid; }
+.pv-section-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: #142878;
+  padding: 7px 12px;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pv-items { border: 1px solid #DDE3F0; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; }
+.pv-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 12px;
+  border-bottom: 1px solid #EEF1F8;
+  font-size: 11px;
+}
+.pv-item:last-child { border-bottom: none; }
+.pv-item.pv-fail { background: #fff8f8; }
+.pv-item.pv-flag { background: #fffdf0; }
+.pv-item.pv-pass { background: #f4fdf8; }
+.pv-item-label { flex: 1; line-height: 1.4; padding-top: 1px; }
+.pv-status {
+  font-family: 'Sora', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pv-status.pass { background: #e7f6ef; color: #0f7b4e; }
+.pv-status.flag { background: #fef3c7; color: #b45309; }
+.pv-status.fail { background: #fee2e2; color: #b91c1c; }
+.pv-status.na   { background: #EEF1F8; color: #9AA3BA; }
+.pv-status.none { background: #EEF1F8; color: #9AA3BA; }
+.pv-item-note {
+  font-size: 10px;
+  color: #5A6482;
+  font-style: italic;
+  margin-top: 2px;
+}
+.pv-app-fields {
+  font-size: 10px;
+  color: #5A6482;
+  margin-top: 2px;
+}
+.pv-sec-comment {
+  padding: 6px 12px;
+  background: #F7F8FC;
+  border-top: 1px dashed #DDE3F0;
+  font-size: 10px;
+  color: #5A6482;
+  font-style: italic;
+}
+.pv-summary {
+  background: #142878;
+  color: #fff;
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+.pv-summary-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #00A0DC;
+  margin-bottom: 12px;
+}
+.pv-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pv-stat { text-align: center; }
+.pv-stat-val { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 800; }
+.pv-stat-label { font-size: 9px; color: rgba(255,255,255,0.5); font-family: 'Sora', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+.pv-stat.s-pass .pv-stat-val { color: #6ee7b7; }
+.pv-stat.s-flag .pv-stat-val { color: #fcd34d; }
+.pv-stat.s-fail .pv-stat-val { color: #fca5a5; }
+.pv-rec-label { font-family: 'Sora', sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
+.pv-rec-text { font-size: 11px; color: rgba(255,255,255,0.9); line-height: 1.6; white-space: pre-wrap; }
+.pv-sig {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #DDE3F0;
+}
+.pv-sig-block { border-top: 1px solid #1A2340; padding-top: 6px; }
+.pv-sig-label { font-family: 'Sora', sans-serif; font-size: 9px; color: #9AA3BA; text-transform: uppercase; letter-spacing: 1px; }
+.pv-addr-full { grid-column: 1 / -1; }
 
 /* ── UTILITY ─────────────────────── */
 .hidden { display: none !important; }
@@ -537,7 +699,7 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
     </div>
 
     <div id="sidebar-footer">
-      <button id="btn-print" onclick="window.print()">🖨&nbsp; Print / Save PDF</button>
+      <button id="btn-print" onclick="printAll()">🖨&nbsp; Print / Save PDF</button>
     </div>
   </div>
 
@@ -554,8 +716,8 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
       <!-- panels injected by JS -->
     </div>
   </div>
-</div>
-
+</div><!-- /#app -->
+<div id="print-view"></div>
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -1065,6 +1227,144 @@ function renderSummaryPanel() {
   panel.appendChild(resetCard);
 
   return panel;
+}
+
+// ─── PRINT ALL ───────────────────────────────────────────────────────────────
+function printAll() {
+  const st = calcStats();
+  const p = state.prop;
+  const pv = document.getElementById('print-view');
+
+  const h = (tag, cls, ...children) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    children.forEach(c => {
+      if (c == null) return;
+      if (typeof c === 'string') e.appendChild(document.createTextNode(c));
+      else e.appendChild(c);
+    });
+    return e;
+  };
+  const div = (cls, ...ch) => h('div', cls, ...ch);
+  const span = (cls, txt) => h('span', cls, txt);
+
+  pv.innerHTML = '';
+
+  // Header
+  const hdr = div('pv-header');
+  const hdrL = div('pv-header-left');
+  hdrL.appendChild(div('pv-co', 'Newera Property Management'));
+  hdrL.appendChild(div('pv-title', 'Property Walkthrough Checklist'));
+  hdr.appendChild(hdrL);
+  const hdrR = div('pv-header-right');
+  hdrR.innerHTML = `${p.date ? `<strong>Date:</strong> ${p.date}<br>` : ''}<strong>Inspector:</strong> ${p.inspector || '—'}`;
+  hdr.appendChild(hdrR);
+  pv.appendChild(hdr);
+
+  // Property info grid
+  const pg = div('pv-prop-grid');
+  const propFields = [
+    { label:'Address', val: p.address, full: true },
+    { label:'Owner',   val: p.owner },
+    { label:'Year Built', val: p.yearBuilt },
+    { label:'Bedrooms', val: p.beds },
+    { label:'Bathrooms', val: p.baths },
+  ];
+  propFields.forEach(f => {
+    const fd = div('pv-prop-field' + (f.full ? ' pv-addr-full' : ''));
+    fd.appendChild(h('label', null, f.label));
+    fd.appendChild(div('pv-val', f.val || '—'));
+    pg.appendChild(fd);
+  });
+  pv.appendChild(pg);
+
+  // Summary stats bar
+  const sumDiv = div('pv-summary');
+  sumDiv.appendChild(div('pv-summary-title', 'Inspection Summary'));
+  const statsRow = div('pv-summary-stats');
+  [
+    { cls:'s-total', val: st.total, label:'Total' },
+    { cls:'s-pass',  val: st.pass,  label:'Passed' },
+    { cls:'s-flag',  val: st.flag,  label:'Flagged' },
+    { cls:'s-fail',  val: st.fail,  label:'Failed' },
+  ].forEach(s => {
+    const sc = div(`pv-stat ${s.cls}`);
+    sc.appendChild(div('pv-stat-val', String(s.val)));
+    sc.appendChild(div('pv-stat-label', s.label));
+    statsRow.appendChild(sc);
+  });
+  sumDiv.appendChild(statsRow);
+  if (state.summary) {
+    sumDiv.appendChild(div('pv-rec-label', 'Overall Recommendation'));
+    sumDiv.appendChild(div('pv-rec-text', state.summary));
+  }
+  pv.appendChild(sumDiv);
+
+  // Each section
+  SECTIONS.forEach(sec => {
+    const secDiv = div('pv-section');
+    const titleBar = div('pv-section-title');
+    titleBar.appendChild(document.createTextNode(sec.icon + ' ' + sec.label));
+    secDiv.appendChild(titleBar);
+
+    const itemsDiv = div('pv-items');
+    sec.items.forEach((item, idx) => {
+      const val  = state.checks[k(sec.id, idx)] || '';
+      const note = state.notes[k(sec.id, idx)] || '';
+      const itemDiv = div(`pv-item${val ? ' pv-'+val : ''}`);
+
+      const labelCol = div('pv-item-label', item.label);
+
+      // Appliance details inline
+      if (item.appliance) {
+        const brand  = state.appliance[kApp(sec.id, idx, 'Brand')]    || '';
+        const model  = state.appliance[kApp(sec.id, idx, 'Model')]    || '';
+        const serial = state.appliance[kApp(sec.id, idx, 'Serial #')] || '';
+        if (brand || model || serial) {
+          const af = div('pv-app-fields');
+          af.textContent = [brand && `Brand: ${brand}`, model && `Model: ${model}`, serial && `S/N: ${serial}`].filter(Boolean).join('  ·  ');
+          labelCol.appendChild(af);
+        }
+      }
+
+      // Note inline
+      if (note) {
+        const noteDiv = div('pv-item-note', `→ ${note}`);
+        labelCol.appendChild(noteDiv);
+      }
+
+      itemDiv.appendChild(labelCol);
+
+      const statusLabels = { pass:'✓ Pass', flag:'⚠ Flag', fail:'✗ Fail', na:'N/A', '':'—' };
+      itemDiv.appendChild(span(`pv-status ${val || 'none'}`, statusLabels[val] || '—'));
+      itemsDiv.appendChild(itemDiv);
+    });
+
+    // Section comment
+    const secComment = state.sectionComments[sec.id] || '';
+    if (secComment) {
+      const sc = div('pv-sec-comment', `📝 ${secComment}`);
+      itemsDiv.appendChild(sc);
+    }
+
+    secDiv.appendChild(itemsDiv);
+    pv.appendChild(secDiv);
+  });
+
+  // Signature lines
+  const sigDiv = div('pv-sig');
+  ['Inspector Signature', 'Owner / Representative Signature', 'Print Name', 'Date'].forEach(lbl => {
+    const sb = div('pv-sig-block');
+    sb.appendChild(div('pv-sig-label', lbl));
+    sigDiv.appendChild(sb);
+  });
+  pv.appendChild(sigDiv);
+
+  // Print then clean up
+  requestAnimationFrame(() => {
+    window.print();
+    setTimeout(() => { pv.innerHTML = ''; }, 1000);
+  });
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────

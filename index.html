@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NPM Inspection">
+<title>NPM Property Inspection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #142878;
+  --navy-dark: #0d1d52;
+  --sky: #00A0DC;
+  --sky-light: #e6f6fd;
+  --gray-50: #F7F8FC;
+  --gray-100: #EEF1F8;
+  --gray-200: #DDE3F0;
+  --gray-400: #9AA3BA;
+  --gray-600: #5A6482;
+  --gray-900: #1A2340;
+  --green: #0f7b4e;
+  --green-bg: #e7f6ef;
+  --amber: #b45309;
+  --amber-bg: #fef3c7;
+  --red: #b91c1c;
+  --red-bg: #fee2e2;
+  --sidebar-w: 280px;
+  --header-h: 64px;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(20,40,120,0.08);
+  --touch: 48px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%; overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  font-size: 16px;
+}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+#app { display: flex; height: 100dvh; }
+
+/* SIDEBAR */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+#sidebar-brand {
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+#sidebar-brand .sub {
+  font-family: 'Sora', sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--sky);
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+#sidebar-brand .title {
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+/* Overall progress */
+#overall-progress {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.prog-bar-track {
+  background: rgba(255,255,255,0.12);
+  border-radius: 99px;
+  height: 6px;
+  margin-bottom: 8px;
+}
+.prog-bar-fill {
+  background: var(--sky);
+  height: 6px;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.prog-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  font-family: 'Sora', sans-serif;
+}
+.prog-stats span { color: rgba(255,255,255,0.5); }
+.prog-stats .s-pass { color: #6ee7b7; }
+.prog-stats .s-flag { color: #fcd34d; }
+.prog-stats .s-fail { color: #fca5a5; }
+
+/* Nav list */
+#nav-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  -webkit-overflow-scrolling: touch;
+}
+#nav-list::-webkit-scrollbar { width: 4px; }
+#nav-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+  min-height: var(--touch);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.nav-item:active { background: rgba(255,255,255,0.05); }
+.nav-item.active {
+  background: rgba(0,160,220,0.18);
+  border-left-color: var(--sky);
+}
+.nav-item .nav-icon { font-size: 18px; flex-shrink: 0; }
+.nav-item .nav-label {
+  flex: 1;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.3;
+}
+.nav-item.active .nav-label { color: #fff; }
+.nav-item .nav-count {
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  font-family: 'Sora', sans-serif;
+  flex-shrink: 0;
+}
+.nav-item .nav-badges { display: flex; gap: 4px; flex-shrink: 0; }
+.nav-badge {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  border-radius: 99px;
+  padding: 1px 6px;
+}
+.nav-badge.fail { background: var(--red-bg); color: var(--red); }
+.nav-badge.flag { background: var(--amber-bg); color: var(--amber); }
+
+/* Sidebar footer */
+#sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+#btn-print {
+  width: 100%;
+  background: var(--sky);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  min-height: var(--touch);
+}
+#btn-print:active { opacity: 0.85; }
+
+/* MAIN CONTENT */
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Section header bar */
+#section-header {
+  background: #fff;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: var(--header-h);
+  flex-shrink: 0;
+}
+#section-header .sec-icon { font-size: 24px; }
+#section-header .sec-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--navy);
+}
+#section-header .sec-sub {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-left: 4px;
+}
+#section-header .sec-badges { display: flex; gap: 6px; margin-left: auto; }
+.sec-badge {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  border-radius: 99px;
+  padding: 4px 12px;
+}
+.sec-badge.fail { background: var(--red-bg); color: var(--red); }
+.sec-badge.flag { background: var(--amber-bg); color: var(--amber); }
+
+/* Scrollable content area */
+#content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 28px 40px;
+}
+#content-scroll::-webkit-scrollbar { width: 6px; }
+#content-scroll::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+
+/* ── PROPERTY INFO PANEL ─────────────────── */
+#prop-panel { display: flex; flex-direction: column; gap: 16px; }
+
+.info-card {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--sky);
+  margin-bottom: 16px;
+}
+.field-grid {
+  display: grid;
+  gap: 14px 20px;
+}
+.field-grid.cols2 { grid-template-columns: 1fr 1fr; }
+.field-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.field-full { grid-column: 1 / -1; }
+
+.field label {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-400);
+  margin-bottom: 6px;
+}
+.field input, .field textarea, .field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  outline: none;
+  transition: border-color 0.15s;
+  min-height: var(--touch);
+  -webkit-appearance: none;
+}
+.field input:focus, .field textarea:focus {
+  border-color: var(--sky);
+  background: #fff;
+}
+.field textarea { min-height: 80px; resize: vertical; }
+
+/* ── CHECKLIST PANEL ─────────────────── */
+#check-panel { display: flex; flex-direction: column; gap: 12px; }
+
+.check-item {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s, background 0.15s;
+}
+.check-item.status-fail { border-color: #fca5a5; background: #fff8f8; }
+.check-item.status-flag { border-color: #fcd34d; background: #fffdf0; }
+.check-item.status-pass { border-color: #86efac; }
+
+.check-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.check-label {
+  flex: 1;
+  font-size: 15px;
+  color: var(--gray-900);
+  line-height: 1.45;
+  min-width: 200px;
+  padding-top: 10px;
+}
+.appliance-badge {
+  display: inline-block;
+  font-family: 'Sora', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: #e8efff;
+  color: var(--navy);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Status buttons */
+.status-btns {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.status-btn {
+  min-height: var(--touch);
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-400);
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+  -webkit-appearance: none;
+}
+.status-btn:active { transform: scale(0.95); }
+.status-btn.active-pass { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+.status-btn.active-flag { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+.status-btn.active-fail { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+.status-btn.active-na { border-color: var(--gray-400); background: var(--gray-100); color: var(--gray-600); }
+
+/* Item note */
+.item-note {
+  margin-top: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  outline: none;
+  min-height: 44px;
+}
+.item-note:focus { border-color: var(--sky); background: #fff; }
+
+/* Appliance fields */
+.appliance-fields {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: var(--gray-50);
+  border-radius: 10px;
+  border: 1px solid var(--gray-200);
+}
+.appliance-fields-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--sky);
+  margin-bottom: 10px;
+}
+.appliance-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px 14px;
+}
+
+/* Section comment box */
+.section-comment-box {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1.5px dashed var(--gray-200);
+  padding: 16px 18px;
+}
+.section-comment-box label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+.section-comment-box textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  outline: none;
+  min-height: 80px;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+.section-comment-box textarea:focus { border-color: var(--sky); background: #fff; }
+
+/* ── SUMMARY PANEL ─────────────────── */
+#summary-panel { display: flex; flex-direction: column; gap: 16px; }
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.stat-card {
+  background: var(--navy);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Sora', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-family: 'Sora', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.5);
+}
+.stat-card.s-total .stat-val { color: #fff; }
+.stat-card.s-pass  .stat-val { color: #6ee7b7; }
+.stat-card.s-flag  .stat-val { color: #fcd34d; }
+.stat-card.s-fail  .stat-val { color: #fca5a5; }
+
+/* Section summary rows */
+.summary-section-row {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow);
+}
+.ssr-icon { font-size: 20px; }
+.ssr-label { flex: 1; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: var(--navy); }
+.ssr-prog { display: flex; align-items: center; gap: 10px; }
+.ssr-bar-track { width: 100px; height: 5px; background: var(--gray-100); border-radius: 99px; }
+.ssr-bar-fill { height: 5px; background: var(--sky); border-radius: 99px; transition: width 0.3s; }
+.ssr-count { font-family: 'Sora', sans-serif; font-size: 11px; color: var(--gray-400); min-width: 36px; text-align: right; }
+.ssr-badges { display: flex; gap: 5px; }
+
+/* ── PRINT ────────────────────────── */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  #sidebar, #section-header { display: none !important; }
+  #app { display: block; height: auto; overflow: visible; }
+  #main { display: block; overflow: visible; }
+  #content-scroll { overflow: visible; padding: 16px; }
+  .status-btn { display: none; }
+  body { font-size: 12px; }
+}
+
+/* ── UTILITY ─────────────────────── */
+.hidden { display: none !important; }
+input::placeholder, textarea::placeholder { color: var(--gray-400); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sidebar-brand">
+      <div class="sub">Newera Property Management</div>
+      <div class="title">Property Walkthrough<br>Checklist</div>
+    </div>
+
+    <div id="overall-progress">
+      <div class="prog-bar-track"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-stats">
+        <span id="prog-text">0 / 0 reviewed</span>
+        <span class="s-pass" id="prog-pass">✓ 0</span>
+        <span class="s-flag" id="prog-flag">⚠ 0</span>
+        <span class="s-fail" id="prog-fail">✗ 0</span>
+      </div>
+    </div>
+
+    <div id="nav-list">
+      <div class="nav-item active" data-section="property" onclick="showSection('property')">
+        <span class="nav-icon">🏢</span>
+        <span class="nav-label">Property Info</span>
+      </div>
+      <!-- Section nav items injected by JS -->
+    </div>
+
+    <div id="sidebar-footer">
+      <button id="btn-print" onclick="window.print()">🖨&nbsp; Print / Save PDF</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="section-header">
+      <span class="sec-icon" id="hdr-icon">🏢</span>
+      <span class="sec-title" id="hdr-title">Property Information</span>
+      <span class="sec-sub" id="hdr-sub"></span>
+      <div class="sec-badges" id="hdr-badges"></div>
+    </div>
+
+    <div id="content-scroll">
+      <!-- panels injected by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const SECTIONS = [
+  {
+    id: "exterior", label: "Exterior & Curb Appeal", icon: "🏠",
+    items: [
+      { label: "Roof condition (missing shingles, sagging, visible damage)" },
+      { label: "Gutters & downspouts (attached, clear, no rust)" },
+      { label: "Fascia & soffit (no rot or pest damage)" },
+      { label: "Exterior paint or siding (peeling, cracks, warping)" },
+      { label: "Foundation (visible cracks, settling, drainage slope)" },
+      { label: "Driveway & walkways (cracks, trip hazards)" },
+      { label: "Landscaping (overgrowth, dead trees, drainage issues)" },
+      { label: "Fencing (condition, gates functional)" },
+      { label: "Garage door & opener functional", appliance: true },
+      { label: "Exterior lighting functional" },
+      { label: "Mailbox present and in good condition" },
+      { label: "Address numbers visible from street" },
+    ]
+  },
+  {
+    id: "interior", label: "Interior – General", icon: "🚪",
+    items: [
+      { label: "Front door locks, deadbolt, and weatherstripping" },
+      { label: "All interior doors open/close/latch properly" },
+      { label: "Walls – no holes, stains, or mold" },
+      { label: "Ceilings – no water stains, cracks, or sagging" },
+      { label: "Floors – no major damage, soft spots, or trip hazards" },
+      { label: "Windows open, close, lock, and seal properly" },
+      { label: "Window screens present and intact" },
+      { label: "Smoke detectors present and functional (per room)" },
+      { label: "Carbon monoxide detectors present (near sleeping areas)" },
+      { label: "Stairs – handrails secure, no broken treads" },
+      { label: "Attic access – visible signs of leaks or pests" },
+      { label: "Storage areas accessible and free of debris" },
+    ]
+  },
+  {
+    id: "kitchen", label: "Kitchen", icon: "🍳",
+    items: [
+      { label: "Appliances present per lease (refrigerator, range, dishwasher)" },
+      { label: "Range/oven burners functional", appliance: true },
+      { label: "Refrigerator cooling properly", appliance: true },
+      { label: "Dishwasher runs and drains", appliance: true },
+      { label: "Range hood & exhaust fan functional", appliance: true },
+      { label: "Garbage disposal functional (if present)", appliance: true },
+      { label: "Cabinet doors and drawers operate properly" },
+      { label: "Countertops – no cracks, burns, or water damage" },
+      { label: "Sink – faucet, hot/cold, adequate pressure" },
+      { label: "Sink drain – no leaks under cabinet" },
+      { label: "GFCI outlet present within 6 ft of sink" },
+      { label: "No signs of pest activity" },
+    ]
+  },
+  {
+    id: "bathrooms", label: "Bathrooms", icon: "🚿",
+    items: [
+      { label: "Toilet flushes and refills; no rocking or leaks at base" },
+      { label: "Sink faucet – hot/cold, adequate pressure" },
+      { label: "Sink drain functional, no leaks under cabinet" },
+      { label: "Tub/shower – hot/cold, adequate pressure" },
+      { label: "Tub/shower drain functional" },
+      { label: "Caulking around tub/shower intact (no mold gaps)" },
+      { label: "Exhaust fan functional" },
+      { label: "GFCI outlet present" },
+      { label: "Towel bars and toilet paper holder secure" },
+      { label: "Mirror and vanity in good condition" },
+      { label: "No signs of water damage on walls or floor" },
+      { label: "Storage functional (cabinet doors, drawers)" },
+    ]
+  },
+  {
+    id: "hvac", label: "HVAC & Utilities", icon: "❄️",
+    items: [
+      { label: "HVAC system turns on in heat and cool mode", appliance: true },
+      { label: "Air filter present – note condition and last change date" },
+      { label: "All vents present and unobstructed" },
+      { label: "Thermostat functional", appliance: true },
+      { label: "Water heater – no rust, leaks, or corrosion; age noted", appliance: true },
+      { label: "Washer hookup present and undamaged (if applicable)", appliance: true },
+      { label: "Dryer hookup present and undamaged (if applicable)", appliance: true },
+      { label: "Water pressure adequate throughout" },
+      { label: "No evidence of active plumbing leaks" },
+      { label: "Electrical panel – no tripped breakers, no burn marks" },
+      { label: "All outlets functional (spot check each room)" },
+      { label: "All light switches functional" },
+      { label: "Gas shut-off accessible and labeled (if applicable)" },
+    ]
+  },
+  {
+    id: "safety", label: "Safety & Compliance", icon: "🔒",
+    items: [
+      { label: "All exterior entry points lock securely" },
+      { label: "Peephole present and functional in all exterior entry doors" },
+      { label: "Window locks functional on all windows" },
+      { label: "Garage pedestrian door has keyed lock" },
+      { label: "Pool/spa fence & gate self-closing (if applicable)" },
+      { label: "No exposed wiring visible" },
+      { label: "No evidence of mold beyond normal surface level" },
+      { label: "No evidence of active pest infestation" },
+      { label: "Water heater T&P relief valve present" },
+      { label: "Proper egress windows in bedrooms" },
+      { label: "No standing water under/around property" },
+      { label: "Lead paint disclosure provided if pre-1978" },
+    ]
+  },
+  {
+    id: "owner_notes", label: "Owner Conversation Notes", icon: "📋",
+    items: [
+      { label: "Any known repairs completed in last 12 months" },
+      { label: "Any known deferred maintenance or issues" },
+      { label: "HOA rules or restrictions discussed" },
+      { label: "Pet policy agreed upon" },
+      { label: "Preferred communication method confirmed" },
+      { label: "Move-in timeline discussed" },
+      { label: "Key/access code handoff plan confirmed" },
+      { label: "Owner emergency contact collected" },
+    ]
+  },
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const STATE_KEY = 'npm_checklist_v1';
+let state = loadState();
+
+function defaultState() {
+  return {
+    prop: { address:'', owner:'', yearBuilt:'', beds:'', baths:'', date:'', inspector:'' },
+    checks: {},      // "sectionId__idx" -> "pass"|"flag"|"fail"|"na"
+    notes: {},       // "sectionId__idx" -> string
+    appliance: {},   // "sectionId__idx__field" -> string
+    sectionComments:{}, // sectionId -> string
+    summary: '',
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (raw) return { ...defaultState(), ...JSON.parse(raw) };
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+const k = (sid, idx) => `${sid}__${idx}`;
+const kApp = (sid, idx, field) => `${sid}__${idx}__${field}`;
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
+function calcStats() {
+  const total = SECTIONS.reduce((a,s) => a + s.items.length, 0);
+  let checked=0, pass=0, flag=0, fail=0;
+  Object.values(state.checks).forEach(v => {
+    if (v) { checked++; if(v==='pass') pass++; else if(v==='flag') flag++; else if(v==='fail') fail++; }
+  });
+  return { total, checked, pass, flag, fail };
+}
+
+function sectionStats(sec) {
+  let checked=0, pass=0, flag=0, fail=0;
+  sec.items.forEach((_, idx) => {
+    const v = state.checks[k(sec.id, idx)] || '';
+    if (v) { checked++; if(v==='pass') pass++; else if(v==='flag') flag++; else if(v==='fail') fail++; }
+  });
+  return { total: sec.items.length, checked, pass, flag, fail };
+}
+
+// ─── RENDER HELPERS ──────────────────────────────────────────────────────────
+function el(tag, attrs={}, ...children) {
+  const e = document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v]) => {
+    if (k === 'className') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+    else e.setAttribute(k, v);
+  });
+  children.flat().forEach(c => {
+    if (c == null) return;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+
+function inp(placeholder, value, onChange, type='text', extraClass='') {
+  const i = document.createElement('input');
+  i.type = type; i.placeholder = placeholder || ''; i.value = value || '';
+  if (extraClass) i.className = extraClass;
+  i.addEventListener('input', e => onChange(e.target.value));
+  return i;
+}
+
+function textarea(placeholder, value, onChange, className='') {
+  const t = document.createElement('textarea');
+  t.placeholder = placeholder; t.value = value || '';
+  if (className) t.className = className;
+  t.addEventListener('input', e => onChange(e.target.value));
+  return t;
+}
+
+function field(labelText, inputEl, fullWidth=false) {
+  const d = el('div', { className: 'field' + (fullWidth ? ' field-full' : '') });
+  d.appendChild(el('label', {}, labelText));
+  d.appendChild(inputEl);
+  return d;
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+let currentSection = 'property';
+
+function showSection(id) {
+  currentSection = id;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === id));
+  renderContent();
+  document.getElementById('content-scroll').scrollTop = 0;
+}
+
+function buildNav() {
+  const nav = document.getElementById('nav-list');
+  // Keep the property info item (first child), rebuild the rest
+  while (nav.children.length > 1) nav.removeChild(nav.lastChild);
+
+  SECTIONS.forEach(sec => {
+    const st = sectionStats(sec);
+    const item = el('div', { className: 'nav-item', 'data-section': sec.id, onclick: () => showSection(sec.id) },
+      el('span', { className: 'nav-icon' }, sec.icon),
+      el('span', { className: 'nav-label' }, sec.label),
+      el('span', { className: 'nav-count' }, `${st.checked}/${st.total}`),
+    );
+    const badges = el('div', { className: 'nav-badges' });
+    if (st.fail > 0) badges.appendChild(el('span', { className: 'nav-badge fail' }, `✗${st.fail}`));
+    if (st.flag > 0) badges.appendChild(el('span', { className: 'nav-badge flag' }, `⚠${st.flag}`));
+    if (badges.children.length) item.appendChild(badges);
+    nav.appendChild(item);
+  });
+
+  // Summary nav item
+  const sumItem = el('div', { className: 'nav-item', 'data-section': 'summary', onclick: () => showSection('summary') },
+    el('span', { className: 'nav-icon' }, '📊'),
+    el('span', { className: 'nav-label' }, 'Summary'),
+  );
+  nav.appendChild(sumItem);
+
+  // Re-mark active
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === currentSection));
+}
+
+function updateProgress() {
+  const st = calcStats();
+  const pct = st.total ? Math.round(st.checked / st.total * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = `${st.checked} / ${st.total} reviewed`;
+  document.getElementById('prog-pass').textContent = `✓ ${st.pass}`;
+  document.getElementById('prog-flag').textContent = `⚠ ${st.flag}`;
+  document.getElementById('prog-fail').textContent = `✗ ${st.fail}`;
+}
+
+// ─── SECTION HEADER ──────────────────────────────────────────────────────────
+function updateSectionHeader(title, icon, sub, secId) {
+  document.getElementById('hdr-icon').textContent = icon;
+  document.getElementById('hdr-title').textContent = title;
+  document.getElementById('hdr-sub').textContent = sub || '';
+  const badges = document.getElementById('hdr-badges');
+  badges.innerHTML = '';
+  if (secId) {
+    const sec = SECTIONS.find(s => s.id === secId);
+    if (sec) {
+      const st = sectionStats(sec);
+      if (st.fail > 0) badges.appendChild(el('span', { className: 'sec-badge fail' }, `✗ ${st.fail} failed`));
+      if (st.flag > 0) badges.appendChild(el('span', { className: 'sec-badge flag' }, `⚠ ${st.flag} flagged`));
+    }
+  }
+}
+
+// ─── RENDER CONTENT ──────────────────────────────────────────────────────────
+function renderContent() {
+  const scroll = document.getElementById('content-scroll');
+  scroll.innerHTML = '';
+
+  if (currentSection === 'property') {
+    updateSectionHeader('Property Information', '🏢', '');
+    scroll.appendChild(renderPropertyPanel());
+  } else if (currentSection === 'summary') {
+    updateSectionHeader('Inspection Summary', '📊', '');
+    scroll.appendChild(renderSummaryPanel());
+  } else {
+    const sec = SECTIONS.find(s => s.id === currentSection);
+    if (sec) {
+      const st = sectionStats(sec);
+      updateSectionHeader(sec.label, sec.icon, `${st.checked} of ${st.total} reviewed`, sec.id);
+      scroll.appendChild(renderChecklistPanel(sec));
+    }
+  }
+}
+
+// ─── PROPERTY PANEL ──────────────────────────────────────────────────────────
+function renderPropertyPanel() {
+  const panel = el('div', { id: 'prop-panel' });
+
+  const card1 = el('div', { className: 'info-card' });
+  card1.appendChild(el('div', { className: 'card-title' }, 'Property Details'));
+
+  const g1 = el('div', { className: 'field-grid cols2' });
+
+  const addrInp = inp('123 Main St, San Antonio TX', state.prop.address, v => { state.prop.address=v; saveState(); });
+  g1.appendChild(field('Property Address', addrInp, true));
+
+  const ownerInp = inp('John Smith', state.prop.owner, v => { state.prop.owner=v; saveState(); });
+  g1.appendChild(field('Owner Name', ownerInp));
+
+  const ybInp = inp('e.g. 1998', state.prop.yearBuilt, v => { state.prop.yearBuilt=v; saveState(); }, 'number');
+  g1.appendChild(field('Year Built', ybInp));
+
+  const bedsInp = inp('e.g. 3', state.prop.beds, v => { state.prop.beds=v; saveState(); }, 'number');
+  g1.appendChild(field('Bedrooms', bedsInp));
+
+  const bathsInp = inp('e.g. 2.5', state.prop.baths, v => { state.prop.baths=v; saveState(); }, 'number');
+  g1.appendChild(field('Bathrooms', bathsInp));
+
+  const dateInp = inp('', state.prop.date, v => { state.prop.date=v; saveState(); }, 'date');
+  g1.appendChild(field('Inspection Date', dateInp));
+
+  const inspInp = inp('NPM Team Member', state.prop.inspector, v => { state.prop.inspector=v; saveState(); });
+  g1.appendChild(field('Inspected By', inspInp));
+
+  card1.appendChild(g1);
+  panel.appendChild(card1);
+
+  // Instructions card
+  const card2 = el('div', { className: 'info-card' });
+  card2.appendChild(el('div', { className: 'card-title' }, 'How to Use'));
+  const ul = el('ul', { style: 'padding-left:18px; line-height:2; color:var(--gray-600); font-size:14px;' });
+  [
+    'Tap a section in the left sidebar to navigate.',
+    'Mark each item Pass, Flag, Warn, or N/A.',
+    'Flagged or failed items auto-reveal a note field.',
+    'Appliance items include Brand / Model / Serial # fields.',
+    'Each section has a comment box for general observations.',
+    'Your progress saves automatically to this device.',
+    'Tap Print / Save PDF to export a copy.',
+  ].forEach(t => ul.appendChild(el('li', {}, t)));
+  card2.appendChild(ul);
+  panel.appendChild(card2);
+
+  return panel;
+}
+
+// ─── CHECKLIST PANEL ─────────────────────────────────────────────────────────
+function renderChecklistPanel(sec) {
+  const panel = el('div', { id: 'check-panel' });
+
+  sec.items.forEach((item, idx) => {
+    const itemKey = k(sec.id, idx);
+    const curVal = state.checks[itemKey] || '';
+    const curNote = state.notes[itemKey] || '';
+
+    const card = el('div', { className: `check-item status-${curVal}` });
+
+    // Top row
+    const top = el('div', { className: 'check-top' });
+
+    // Label
+    const labelWrap = el('div', { className: 'check-label' }, item.label);
+    if (item.appliance) labelWrap.appendChild(el('span', { className: 'appliance-badge' }, 'Appliance'));
+    top.appendChild(labelWrap);
+
+    // Status buttons
+    const btns = el('div', { className: 'status-btns' });
+    [
+      { key:'pass', label:'✓ Pass' },
+      { key:'flag', label:'⚠ Flag' },
+      { key:'fail', label:'✗ Fail' },
+      { key:'na',   label:'N/A' },
+    ].forEach(({ key, label }) => {
+      const btn = el('button', {
+        className: `status-btn${curVal === key ? ` active-${key}` : ''}`,
+        onclick: () => {
+          const newVal = state.checks[itemKey] === key ? '' : key;
+          state.checks[itemKey] = newVal;
+          saveState();
+          buildNav(); updateProgress(); renderContent();
+        }
+      }, label);
+      btns.appendChild(btn);
+    });
+    top.appendChild(btns);
+    card.appendChild(top);
+
+    // Appliance fields
+    if (item.appliance) {
+      const af = el('div', { className: 'appliance-fields' });
+      af.appendChild(el('div', { className: 'appliance-fields-title' }, 'Equipment Details'));
+      const grid = el('div', { className: 'appliance-fields-grid' });
+      [
+        { f:'Brand',    ph:'e.g. Lennox' },
+        { f:'Model',    ph:'e.g. XC21-060' },
+        { f:'Serial #', ph:'e.g. 5107A12345' },
+      ].forEach(({ f, ph }) => {
+        const aKey = kApp(sec.id, idx, f);
+        const aInp = inp(ph, state.appliance[aKey] || '', v => { state.appliance[aKey]=v; saveState(); });
+        grid.appendChild(field(f, aInp));
+      });
+      af.appendChild(grid);
+      card.appendChild(af);
+    }
+
+    // Note field — shown when flagged/failed or note exists
+    if (curVal === 'flag' || curVal === 'fail' || curNote) {
+      const noteEl = textarea(
+        'Note: repair needed, follow-up action, estimated cost...',
+        curNote,
+        v => { state.notes[itemKey]=v; saveState(); },
+        'item-note'
+      );
+      noteEl.style.borderColor = curVal === 'fail' ? '#fca5a5' : curVal === 'flag' ? '#fcd34d' : 'var(--gray-200)';
+      card.appendChild(noteEl);
+    }
+
+    panel.appendChild(card);
+  });
+
+  // Section comment box
+  const commentBox = el('div', { className: 'section-comment-box' });
+  const commentLabel = el('label', {}, '📝 ', 'Section Comments');
+  commentBox.appendChild(commentLabel);
+  commentBox.appendChild(textarea(
+    `General observations or follow-up notes for ${sec.label}...`,
+    state.sectionComments[sec.id] || '',
+    v => { state.sectionComments[sec.id]=v; saveState(); }
+  ));
+  panel.appendChild(commentBox);
+
+  return panel;
+}
+
+// ─── SUMMARY PANEL ───────────────────────────────────────────────────────────
+function renderSummaryPanel() {
+  const panel = el('div', { id: 'summary-panel' });
+  const st = calcStats();
+
+  // Stat cards
+  const statsRow = el('div', { className: 'summary-stats' });
+  [
+    { cls:'s-total', val:st.total,   label:'Total' },
+    { cls:'s-pass',  val:st.pass,    label:'Passed' },
+    { cls:'s-flag',  val:st.flag,    label:'Flagged' },
+    { cls:'s-fail',  val:st.fail,    label:'Failed' },
+  ].forEach(({ cls, val, label }) => {
+    const c = el('div', { className: `stat-card ${cls}` });
+    c.appendChild(el('div', { className: 'stat-val' }, String(val)));
+    c.appendChild(el('div', { className: 'stat-label' }, label));
+    statsRow.appendChild(c);
+  });
+  panel.appendChild(statsRow);
+
+  // Per-section rows
+  const secCard = el('div', { className: 'info-card' });
+  secCard.appendChild(el('div', { className: 'card-title' }, 'Section Breakdown'));
+  SECTIONS.forEach(sec => {
+    const ss = sectionStats(sec);
+    const pct = ss.total ? Math.round(ss.checked / ss.total * 100) : 0;
+    const row = el('div', { className: 'summary-section-row' });
+    row.appendChild(el('span', { className: 'ssr-icon' }, sec.icon));
+    row.appendChild(el('span', { className: 'ssr-label' }, sec.label));
+    const prog = el('div', { className: 'ssr-prog' });
+    const track = el('div', { className: 'ssr-bar-track' });
+    const fill = el('div', { className: 'ssr-bar-fill', style: `width:${pct}%` });
+    track.appendChild(fill);
+    prog.appendChild(track);
+    prog.appendChild(el('span', { className: 'ssr-count' }, `${ss.checked}/${ss.total}`));
+    row.appendChild(prog);
+    const badges = el('div', { className: 'ssr-badges' });
+    if (ss.fail > 0) badges.appendChild(el('span', { className: 'nav-badge fail' }, `✗${ss.fail}`));
+    if (ss.flag > 0) badges.appendChild(el('span', { className: 'nav-badge flag' }, `⚠${ss.flag}`));
+    row.appendChild(badges);
+    secCard.appendChild(row);
+  });
+  panel.appendChild(secCard);
+
+  // Overall recommendation
+  const recCard = el('div', { className: 'info-card' });
+  recCard.appendChild(el('div', { className: 'card-title' }, 'Overall Recommendation'));
+  recCard.appendChild(textarea(
+    'Summarize overall condition, move-in timeline, deal-breakers, and owner commitments required before signing the management agreement...',
+    state.summary,
+    v => { state.summary=v; saveState(); }
+  ));
+  panel.appendChild(recCard);
+
+  // Reset button
+  const resetCard = el('div', { className: 'info-card', style: 'border-color:#fca5a5;' });
+  resetCard.appendChild(el('div', { className: 'card-title', style: 'color:#b91c1c;' }, 'Reset Checklist'));
+  resetCard.appendChild(el('p', { style: 'font-size:14px; color:var(--gray-600); margin-bottom:14px;' }, 'Clears all data and starts a fresh inspection. This cannot be undone.'));
+  const resetBtn = el('button', {
+    style: 'background:#fff; border:1.5px solid #fca5a5; color:#b91c1c; border-radius:10px; padding:12px 24px; font-family:Sora,sans-serif; font-size:13px; font-weight:700; cursor:pointer; min-height:48px;',
+    onclick: () => {
+      if (confirm('Reset all checklist data? This cannot be undone.')) {
+        state = defaultState();
+        localStorage.removeItem(STATE_KEY);
+        showSection('property');
+        buildNav(); updateProgress();
+      }
+    }
+  }, '🗑 Reset All Data');
+  resetCard.appendChild(resetBtn);
+  panel.appendChild(resetCard);
+
+  return panel;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+buildNav();
+updateProgress();
+renderContent();
+</script>
+</body>
+</html>

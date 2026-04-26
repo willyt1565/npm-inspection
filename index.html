@@ -287,12 +287,30 @@ input::placeholder,textarea::placeholder{color:var(--gray-400);}
 
 <div id="print-view"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://bqptmeepsiudlqldznwv.supabase.co';
 const SB_KEY = 'sb_publishable_zftwVgpgRNNAVYZtASRVrQ_1mH84RSS';
-const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+let sb;
+try {
+  sb = window.supabase.createClient(SB_URL, SB_KEY);
+} catch(e) {
+  document.getElementById('loading-screen').innerHTML = `
+    <div style="text-align:center;padding:32px;max-width:400px;">
+      <div style="font-family:Sora,sans-serif;font-size:14px;color:#fca5a5;font-weight:700;margin-bottom:12px;">⚠ Connection Error</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">Could not connect to the database.<br>Please check your internet connection and reload.</div>
+      <button onclick="location.reload()" style="margin-top:20px;background:#00A0DC;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-family:Sora,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Reload</button>
+    </div>`;
+}
+
+// Fallback: if auth state never fires within 7s, show login screen anyway
+const initTimeout = setTimeout(() => {
+  if (document.getElementById('loading-screen') && !document.getElementById('loading-screen').classList.contains('hidden')) {
+    showScreen('auth');
+  }
+}, 7000);
 
 // ── SECTIONS ──────────────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -569,6 +587,7 @@ function showScreen(which) {
 }
 
 sb.auth.onAuthStateChange(async (event, session) => {
+  clearTimeout(initTimeout);
   if (session?.user) await initSession(session.user);
   else { currentUser=null; showScreen('auth'); }
 });

@@ -8,702 +8,272 @@
 <meta name="apple-mobile-web-app-title" content="NPM Inspection">
 <title>NPM Property Inspection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --navy: #142878;
-  --navy-dark: #0d1d52;
-  --sky: #00A0DC;
-  --sky-light: #e6f6fd;
-  --gray-50: #F7F8FC;
-  --gray-100: #EEF1F8;
-  --gray-200: #DDE3F0;
-  --gray-400: #9AA3BA;
-  --gray-600: #5A6482;
-  --gray-900: #1A2340;
-  --green: #0f7b4e;
-  --green-bg: #e7f6ef;
-  --amber: #b45309;
-  --amber-bg: #fef3c7;
-  --red: #b91c1c;
-  --red-bg: #fee2e2;
-  --sidebar-w: 280px;
-  --header-h: 64px;
-  --radius: 12px;
-  --shadow: 0 2px 12px rgba(20,40,120,0.08);
-  --touch: 48px;
+  --navy:#142878; --navy-dark:#0d1d52; --sky:#00A0DC;
+  --gray-50:#F7F8FC; --gray-100:#EEF1F8; --gray-200:#DDE3F0;
+  --gray-400:#9AA3BA; --gray-600:#5A6482; --gray-900:#1A2340;
+  --green:#0f7b4e; --green-bg:#e7f6ef;
+  --amber:#b45309; --amber-bg:#fef3c7;
+  --red:#b91c1c; --red-bg:#fee2e2;
+  --sidebar-w:280px; --header-h:64px; --radius:12px;
+  --shadow:0 2px 12px rgba(20,40,120,0.08); --touch:48px;
 }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--gray-50);color:var(--gray-900);font-size:16px;}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* ── LOADING ── */
+#loading-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px;}
+#loading-screen .l-sub{font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--sky);}
+#loading-screen .l-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:rgba(255,255,255,0.7);}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:var(--sky);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-html, body {
-  height: 100%; overflow: hidden;
-  font-family: 'DM Sans', sans-serif;
-  background: var(--gray-50);
-  color: var(--gray-900);
-  font-size: 16px;
-}
+/* ── AUTH ── */
+#auth-screen{min-height:100dvh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1d52 0%,#142878 60%,#1a3a9e 100%);padding:24px;}
+.auth-card{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(10,20,80,0.3);}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo .auth-co{font-family:'Sora',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;color:var(--sky);margin-bottom:4px;}
+.auth-logo .auth-title{font-family:'Sora',sans-serif;font-size:22px;font-weight:800;color:var(--navy);}
+.auth-logo .auth-sub{font-size:13px;color:var(--gray-400);margin-top:4px;}
+.auth-tabs{display:flex;background:var(--gray-100);border-radius:10px;padding:4px;margin-bottom:24px;}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--gray-400);transition:all 0.15s;}
+.auth-tab.active{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(20,40,120,0.12);}
+.auth-field{margin-bottom:16px;}
+.auth-field label{display:block;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray-400);margin-bottom:6px;}
+.auth-field input{width:100%;padding:13px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--gray-900);outline:none;transition:border-color 0.15s;min-height:var(--touch);-webkit-appearance:none;}
+.auth-field input:focus{border-color:var(--sky);}
+#auth-error{background:var(--red-bg);color:var(--red);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
+.auth-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:12px;padding:15px;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;cursor:pointer;min-height:var(--touch);transition:opacity 0.15s;margin-top:4px;}
+.auth-btn:active{opacity:0.85;}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
-/* ── LAYOUT ─────────────────────────────────────── */
-#app { display: flex; height: 100dvh; }
+/* ── MAIN APP ── */
+#app{display:flex;height:100dvh;}
 
 /* SIDEBAR */
-#sidebar {
-  width: var(--sidebar-w);
-  background: var(--navy);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  overflow: hidden;
-}
+#sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+#sidebar-brand{padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;}
+#sidebar-brand .sub{font-family:'Sora',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--sky);font-weight:700;margin-bottom:2px;}
+#sidebar-brand .title{font-family:'Sora',sans-serif;font-size:14px;font-weight:800;color:#fff;line-height:1.2;}
 
-#sidebar-brand {
-  padding: 20px 20px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  flex-shrink: 0;
-}
-#sidebar-brand .sub {
-  font-family: 'Sora', sans-serif;
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--sky);
-  font-weight: 700;
-  margin-bottom: 3px;
-}
-#sidebar-brand .title {
-  font-family: 'Sora', sans-serif;
-  font-size: 15px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.2;
-}
+/* User bar */
+#user-bar{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.user-avatar{width:32px;height:32px;border-radius:99px;background:var(--sky);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.user-info{flex:1;overflow:hidden;}
+.user-name{font-family:'Sora',sans-serif;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-email{font-size:10px;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,0.35);font-size:18px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0;}
+.logout-btn:active{color:rgba(255,255,255,0.7);}
 
-/* Overall progress */
-#overall-progress {
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  flex-shrink: 0;
-}
-.prog-bar-track {
-  background: rgba(255,255,255,0.12);
-  border-radius: 99px;
-  height: 6px;
-  margin-bottom: 8px;
-}
-.prog-bar-fill {
-  background: var(--sky);
-  height: 6px;
-  border-radius: 99px;
-  transition: width 0.4s ease;
-}
-.prog-stats {
-  display: flex;
-  gap: 12px;
-  font-size: 11px;
-  font-family: 'Sora', sans-serif;
-}
-.prog-stats span { color: rgba(255,255,255,0.5); }
-.prog-stats .s-pass { color: #6ee7b7; }
-.prog-stats .s-flag { color: #fcd34d; }
-.prog-stats .s-fail { color: #fca5a5; }
+/* Inspection switcher */
+#insp-switcher{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
+.insp-switcher-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.insp-switcher-label{font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.4);}
+.insp-new-btn{background:rgba(0,160,220,0.2);border:1px solid rgba(0,160,220,0.4);border-radius:6px;color:var(--sky);font-family:'Sora',sans-serif;font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer;min-height:28px;}
+.insp-list{display:flex;flex-direction:column;gap:3px;max-height:130px;overflow-y:auto;}
+.insp-list::-webkit-scrollbar{width:3px;}
+.insp-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px;}
+.insp-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;cursor:pointer;border:1px solid transparent;}
+.insp-row.active{background:rgba(0,160,220,0.2);border-color:rgba(0,160,220,0.4);}
+.insp-row-label{flex:1;font-size:11px;color:rgba(255,255,255,0.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.insp-row.active .insp-row-label{color:#fff;font-weight:600;}
+.insp-row-del{background:none;border:none;color:rgba(255,255,255,0.25);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;}
 
-/* Nav list */
-#nav-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 0;
-  -webkit-overflow-scrolling: touch;
-}
-#nav-list::-webkit-scrollbar { width: 4px; }
-#nav-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+/* Progress */
+#overall-progress{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;}
+.prog-bar-track{background:rgba(255,255,255,0.12);border-radius:99px;height:5px;margin-bottom:6px;}
+.prog-bar-fill{background:var(--sky);height:5px;border-radius:99px;transition:width 0.4s;}
+.prog-stats{display:flex;gap:10px;font-size:10px;font-family:'Sora',sans-serif;}
+.prog-stats span{color:rgba(255,255,255,0.5);}
+.prog-stats .s-pass{color:#6ee7b7;} .prog-stats .s-flag{color:#fcd34d;} .prog-stats .s-fail{color:#fca5a5;}
 
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
-  min-height: var(--touch);
-  user-select: none;
-  -webkit-user-select: none;
-}
-.nav-item:active { background: rgba(255,255,255,0.05); }
-.nav-item.active {
-  background: rgba(0,160,220,0.18);
-  border-left-color: var(--sky);
-}
-.nav-item .nav-icon { font-size: 18px; flex-shrink: 0; }
-.nav-item .nav-label {
-  flex: 1;
-  font-family: 'Sora', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.75);
-  line-height: 1.3;
-}
-.nav-item.active .nav-label { color: #fff; }
-.nav-item .nav-count {
-  font-size: 10px;
-  color: rgba(255,255,255,0.35);
-  font-family: 'Sora', sans-serif;
-  flex-shrink: 0;
-}
-.nav-item .nav-badges { display: flex; gap: 4px; flex-shrink: 0; }
-.nav-badge {
-  font-size: 10px;
-  font-weight: 700;
-  font-family: 'Sora', sans-serif;
-  border-radius: 99px;
-  padding: 1px 6px;
-}
-.nav-badge.fail { background: var(--red-bg); color: var(--red); }
-.nav-badge.flag { background: var(--amber-bg); color: var(--amber); }
+/* Nav */
+#nav-list{flex:1;overflow-y:auto;padding:6px 0;-webkit-overflow-scrolling:touch;}
+#nav-list::-webkit-scrollbar{width:3px;}
+#nav-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-left:3px solid transparent;transition:background 0.15s;min-height:44px;user-select:none;-webkit-user-select:none;}
+.nav-item:active{background:rgba(255,255,255,0.05);}
+.nav-item.active{background:rgba(0,160,220,0.18);border-left-color:var(--sky);}
+.nav-item .nav-icon{font-size:16px;flex-shrink:0;}
+.nav-item .nav-label{flex:1;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);line-height:1.3;}
+.nav-item.active .nav-label{color:#fff;}
+.nav-item .nav-count{font-size:10px;color:rgba(255,255,255,0.3);font-family:'Sora',sans-serif;flex-shrink:0;}
+.nav-item .nav-badges{display:flex;gap:3px;flex-shrink:0;}
+.nav-badge{font-size:9px;font-weight:700;font-family:'Sora',sans-serif;border-radius:99px;padding:1px 5px;}
+.nav-badge.fail{background:var(--red-bg);color:var(--red);}
+.nav-badge.flag{background:var(--amber-bg);color:var(--amber);}
 
-/* Sidebar footer */
-#sidebar-footer {
-  padding: 14px 16px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  flex-shrink: 0;
-}
-#btn-print {
-  width: 100%;
-  background: var(--sky);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 12px;
-  font-family: 'Sora', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.3px;
-  min-height: var(--touch);
-}
-#btn-print:active { opacity: 0.85; }
+/* Footer */
+#sidebar-footer{padding:10px 16px;border-top:1px solid rgba(255,255,255,0.1);flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+#save-status{font-family:'Sora',sans-serif;font-size:10px;text-align:center;height:14px;color:rgba(255,255,255,0.35);}
+#save-status.saving{color:#fcd34d;} #save-status.saved{color:#6ee7b7;} #save-status.error{color:#fca5a5;}
+#btn-print{width:100%;background:var(--sky);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:var(--touch);}
+#btn-print:active{opacity:0.85;}
 
-/* MAIN CONTENT */
-#main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#section-header{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 28px;display:flex;align-items:center;gap:14px;height:var(--header-h);flex-shrink:0;}
+#section-header .sec-icon{font-size:22px;}
+#section-header .sec-title{font-family:'Sora',sans-serif;font-size:17px;font-weight:800;color:var(--navy);}
+#section-header .sec-sub{font-size:12px;color:var(--gray-400);margin-left:4px;}
+#section-header .sec-badges{display:flex;gap:6px;margin-left:auto;}
+.sec-badge{font-size:12px;font-weight:700;font-family:'Sora',sans-serif;border-radius:99px;padding:4px 12px;}
+.sec-badge.fail{background:var(--red-bg);color:var(--red);}
+.sec-badge.flag{background:var(--amber-bg);color:var(--amber);}
+#content-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 28px 40px;}
+#content-scroll::-webkit-scrollbar{width:6px;}
+#content-scroll::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:3px;}
 
-/* Section header bar */
-#section-header {
-  background: #fff;
-  border-bottom: 1px solid var(--gray-200);
-  padding: 0 28px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  height: var(--header-h);
-  flex-shrink: 0;
-}
-#section-header .sec-icon { font-size: 24px; }
-#section-header .sec-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--navy);
-}
-#section-header .sec-sub {
-  font-size: 13px;
-  color: var(--gray-400);
-  margin-left: 4px;
-}
-#section-header .sec-badges { display: flex; gap: 6px; margin-left: auto; }
-.sec-badge {
-  font-size: 12px;
-  font-weight: 700;
-  font-family: 'Sora', sans-serif;
-  border-radius: 99px;
-  padding: 4px 12px;
-}
-.sec-badge.fail { background: var(--red-bg); color: var(--red); }
-.sec-badge.flag { background: var(--amber-bg); color: var(--amber); }
+/* CARDS & FORMS */
+.info-card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);padding:20px 22px;box-shadow:var(--shadow);margin-bottom:0;}
+.card-title{font-family:'Sora',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--sky);margin-bottom:16px;}
+.field-grid{display:grid;gap:14px 20px;}
+.field-grid.cols2{grid-template-columns:1fr 1fr;}
+.field-full{grid-column:1/-1;}
+.field label{display:block;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray-400);margin-bottom:6px;}
+.field input,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--gray-900);background:var(--gray-50);outline:none;transition:border-color 0.15s;min-height:var(--touch);-webkit-appearance:none;}
+.field input:focus,.field textarea:focus{border-color:var(--sky);background:#fff;}
+.field textarea{min-height:80px;resize:vertical;}
 
-/* Scrollable content area */
-#content-scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 20px 28px 40px;
-}
-#content-scroll::-webkit-scrollbar { width: 6px; }
-#content-scroll::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+/* CHECKLIST */
+#check-panel{display:flex;flex-direction:column;gap:12px;}
+.check-item{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);padding:16px 18px;box-shadow:var(--shadow);}
+.check-item.status-fail{border-color:#fca5a5;background:#fff8f8;}
+.check-item.status-flag{border-color:#fcd34d;background:#fffdf0;}
+.check-item.status-pass{border-color:#86efac;}
+.check-top{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+.check-label{flex:1;font-size:15px;color:var(--gray-900);line-height:1.45;min-width:200px;padding-top:10px;}
+.appliance-badge{display:inline-block;font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;background:#e8efff;color:var(--navy);border-radius:4px;padding:2px 7px;margin-left:8px;vertical-align:middle;}
+.status-btns{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+.status-btn{min-height:var(--touch);padding:0 16px;border-radius:10px;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-400);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;-webkit-appearance:none;}
+.status-btn:active{transform:scale(0.95);}
+.status-btn.active-pass{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.status-btn.active-flag{border-color:var(--amber);background:var(--amber-bg);color:var(--amber);}
+.status-btn.active-fail{border-color:var(--red);background:var(--red-bg);color:var(--red);}
+.status-btn.active-na{border-color:var(--gray-400);background:var(--gray-100);color:var(--gray-600);}
+.item-note{margin-top:10px;width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-900);background:var(--gray-50);outline:none;min-height:44px;}
+.item-note:focus{border-color:var(--sky);background:#fff;}
+.appliance-fields{margin-top:12px;padding:14px 16px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200);}
+.appliance-fields-title{font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--sky);margin-bottom:10px;}
+.appliance-fields-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 14px;}
+.section-comment-box{background:#fff;border-radius:var(--radius);border:1.5px dashed var(--gray-200);padding:16px 18px;}
+.section-comment-box label{display:flex;align-items:center;gap:6px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);margin-bottom:10px;}
+.section-comment-box textarea{width:100%;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-900);background:var(--gray-50);outline:none;min-height:80px;resize:vertical;}
+.section-comment-box textarea:focus{border-color:var(--sky);background:#fff;}
 
-/* ── PROPERTY INFO PANEL ─────────────────── */
-#prop-panel { display: flex; flex-direction: column; gap: 16px; }
+/* SUMMARY */
+#summary-panel{display:flex;flex-direction:column;gap:16px;}
+.summary-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.stat-card{background:var(--navy);border-radius:var(--radius);padding:16px 14px;text-align:center;}
+.stat-val{font-family:'Sora',sans-serif;font-size:32px;font-weight:800;line-height:1;margin-bottom:5px;}
+.stat-label{font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.5);}
+.stat-card.s-total .stat-val{color:#fff;} .stat-card.s-pass .stat-val{color:#6ee7b7;} .stat-card.s-flag .stat-val{color:#fcd34d;} .stat-card.s-fail .stat-val{color:#fca5a5;}
+.summary-section-row{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);}
+.ssr-icon{font-size:18px;} .ssr-label{flex:1;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--navy);}
+.ssr-bar-track{width:80px;height:5px;background:var(--gray-100);border-radius:99px;}
+.ssr-bar-fill{height:5px;background:var(--sky);border-radius:99px;}
+.ssr-count{font-family:'Sora',sans-serif;font-size:11px;color:var(--gray-400);min-width:32px;text-align:right;}
+.ssr-badges{display:flex;gap:4px;}
 
-.info-card {
-  background: #fff;
-  border-radius: var(--radius);
-  border: 1px solid var(--gray-200);
-  padding: 20px 22px;
-  box-shadow: var(--shadow);
-}
-.card-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--sky);
-  margin-bottom: 16px;
-}
-.field-grid {
-  display: grid;
-  gap: 14px 20px;
-}
-.field-grid.cols2 { grid-template-columns: 1fr 1fr; }
-.field-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
-.field-full { grid-column: 1 / -1; }
+/* COMPLETED */
+#completed-panel{display:flex;flex-direction:column;gap:16px;}
+.completed-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.completed-card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);padding:18px 18px 14px;box-shadow:var(--shadow);}
+.completed-card-address{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;line-height:1.3;}
+.completed-card-meta{font-size:11px;color:var(--gray-400);margin-bottom:12px;line-height:1.6;}
+.completed-card-stats{display:flex;gap:8px;margin-bottom:14px;}
+.cc-stat{flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:var(--gray-50);}
+.cc-stat-val{font-family:'Sora',sans-serif;font-size:18px;font-weight:800;}
+.cc-stat-label{font-family:'Sora',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--gray-400);}
+.cc-stat.s-pass .cc-stat-val{color:var(--green);} .cc-stat.s-flag .cc-stat-val{color:var(--amber);} .cc-stat.s-fail .cc-stat-val{color:var(--red);}
+.completed-card-actions{display:flex;gap:8px;}
+.cc-btn{flex:1;padding:9px 10px;border-radius:8px;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-600);min-height:40px;}
+.cc-btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+.cc-btn:active{opacity:0.8;}
 
-.field label {
-  display: block;
-  font-family: 'Sora', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--gray-400);
-  margin-bottom: 6px;
+/* PRINT */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  #app,#auth-screen,#loading-screen{display:none!important;}
+  #print-view{display:block!important;}
 }
-.field input, .field textarea, .field select {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1.5px solid var(--gray-200);
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  color: var(--gray-900);
-  background: var(--gray-50);
-  outline: none;
-  transition: border-color 0.15s;
-  min-height: var(--touch);
-  -webkit-appearance: none;
-}
-.field input:focus, .field textarea:focus {
-  border-color: var(--sky);
-  background: #fff;
-}
-.field textarea { min-height: 80px; resize: vertical; }
+#print-view{display:none;}
 
-/* ── CHECKLIST PANEL ─────────────────── */
-#check-panel { display: flex; flex-direction: column; gap: 12px; }
-
-.check-item {
-  background: #fff;
-  border-radius: var(--radius);
-  border: 1px solid var(--gray-200);
-  padding: 16px 18px;
-  box-shadow: var(--shadow);
-  transition: border-color 0.15s, background 0.15s;
-}
-.check-item.status-fail { border-color: #fca5a5; background: #fff8f8; }
-.check-item.status-flag { border-color: #fcd34d; background: #fffdf0; }
-.check-item.status-pass { border-color: #86efac; }
-
-.check-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.check-label {
-  flex: 1;
-  font-size: 15px;
-  color: var(--gray-900);
-  line-height: 1.45;
-  min-width: 200px;
-  padding-top: 10px;
-}
-.appliance-badge {
-  display: inline-block;
-  font-family: 'Sora', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  background: #e8efff;
-  color: var(--navy);
-  border-radius: 4px;
-  padding: 2px 7px;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-
-/* Status buttons */
-.status-btns {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-.status-btn {
-  min-height: var(--touch);
-  padding: 0 16px;
-  border-radius: 10px;
-  border: 1.5px solid var(--gray-200);
-  background: #fff;
-  color: var(--gray-400);
-  font-family: 'Sora', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.12s;
-  white-space: nowrap;
-  -webkit-appearance: none;
-}
-.status-btn:active { transform: scale(0.95); }
-.status-btn.active-pass { border-color: var(--green); background: var(--green-bg); color: var(--green); }
-.status-btn.active-flag { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
-.status-btn.active-fail { border-color: var(--red); background: var(--red-bg); color: var(--red); }
-.status-btn.active-na { border-color: var(--gray-400); background: var(--gray-100); color: var(--gray-600); }
-
-/* Item note */
-.item-note {
-  margin-top: 10px;
-  width: 100%;
-  padding: 11px 14px;
-  border: 1.5px solid var(--gray-200);
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--gray-900);
-  background: var(--gray-50);
-  outline: none;
-  min-height: 44px;
-}
-.item-note:focus { border-color: var(--sky); background: #fff; }
-
-/* Appliance fields */
-.appliance-fields {
-  margin-top: 12px;
-  padding: 14px 16px;
-  background: var(--gray-50);
-  border-radius: 10px;
-  border: 1px solid var(--gray-200);
-}
-.appliance-fields-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--sky);
-  margin-bottom: 10px;
-}
-.appliance-fields-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px 14px;
-}
-
-/* Section comment box */
-.section-comment-box {
-  background: #fff;
-  border-radius: var(--radius);
-  border: 1.5px dashed var(--gray-200);
-  padding: 16px 18px;
-}
-.section-comment-box label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Sora', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--navy);
-  margin-bottom: 10px;
-}
-.section-comment-box textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1.5px solid var(--gray-200);
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--gray-900);
-  background: var(--gray-50);
-  outline: none;
-  min-height: 80px;
-  resize: vertical;
-  transition: border-color 0.15s;
-}
-.section-comment-box textarea:focus { border-color: var(--sky); background: #fff; }
-
-/* ── SUMMARY PANEL ─────────────────── */
-#summary-panel { display: flex; flex-direction: column; gap: 16px; }
-
-.summary-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-.stat-card {
-  background: var(--navy);
-  border-radius: var(--radius);
-  padding: 18px 14px;
-  text-align: center;
-}
-.stat-val {
-  font-family: 'Sora', sans-serif;
-  font-size: 36px;
-  font-weight: 800;
-  line-height: 1;
-  margin-bottom: 6px;
-}
-.stat-label {
-  font-family: 'Sora', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.5);
-}
-.stat-card.s-total .stat-val { color: #fff; }
-.stat-card.s-pass  .stat-val { color: #6ee7b7; }
-.stat-card.s-flag  .stat-val { color: #fcd34d; }
-.stat-card.s-fail  .stat-val { color: #fca5a5; }
-
-/* Section summary rows */
-.summary-section-row {
-  background: #fff;
-  border-radius: var(--radius);
-  border: 1px solid var(--gray-200);
-  padding: 14px 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: var(--shadow);
-}
-.ssr-icon { font-size: 20px; }
-.ssr-label { flex: 1; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: var(--navy); }
-.ssr-prog { display: flex; align-items: center; gap: 10px; }
-.ssr-bar-track { width: 100px; height: 5px; background: var(--gray-100); border-radius: 99px; }
-.ssr-bar-fill { height: 5px; background: var(--sky); border-radius: 99px; transition: width 0.3s; }
-.ssr-count { font-family: 'Sora', sans-serif; font-size: 11px; color: var(--gray-400); min-width: 36px; text-align: right; }
-.ssr-badges { display: flex; gap: 5px; }
-
-/* ── PRINT ────────────────────────── */
-@media print {
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  #app { display: none !important; }
-  #print-view { display: block !important; }
-}
-
-/* Print view (hidden on screen) */
-#print-view {
-  display: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  color: #1A2340;
-  padding: 24px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-.pv-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  border-bottom: 3px solid #142878;
-  padding-bottom: 12px;
-  margin-bottom: 18px;
-}
-.pv-header-left .pv-co {
-  font-family: 'Sora', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00A0DC;
-  margin-bottom: 3px;
-}
-.pv-header-left .pv-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  color: #142878;
-}
-.pv-header-right {
-  text-align: right;
-  font-size: 11px;
-  color: #5A6482;
-  line-height: 1.8;
-}
-.pv-prop-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px 20px;
-  background: #F7F8FC;
-  border: 1px solid #DDE3F0;
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-bottom: 20px;
-}
-.pv-prop-field label {
-  display: block;
-  font-family: 'Sora', sans-serif;
-  font-size: 8px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #9AA3BA;
-  margin-bottom: 2px;
-}
-.pv-prop-field .pv-val {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1A2340;
-}
-.pv-section { margin-bottom: 22px; page-break-inside: avoid; }
-.pv-section-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  color: #fff;
-  background: #142878;
-  padding: 7px 12px;
-  border-radius: 6px 6px 0 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.pv-items { border: 1px solid #DDE3F0; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; }
-.pv-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 7px 12px;
-  border-bottom: 1px solid #EEF1F8;
-  font-size: 11px;
-}
-.pv-item:last-child { border-bottom: none; }
-.pv-item.pv-fail { background: #fff8f8; }
-.pv-item.pv-flag { background: #fffdf0; }
-.pv-item.pv-pass { background: #f4fdf8; }
-.pv-item-label { flex: 1; line-height: 1.4; padding-top: 1px; }
-.pv-status {
-  font-family: 'Sora', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 99px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.pv-status.pass { background: #e7f6ef; color: #0f7b4e; }
-.pv-status.flag { background: #fef3c7; color: #b45309; }
-.pv-status.fail { background: #fee2e2; color: #b91c1c; }
-.pv-status.na   { background: #EEF1F8; color: #9AA3BA; }
-.pv-status.none { background: #EEF1F8; color: #9AA3BA; }
-.pv-item-note {
-  font-size: 10px;
-  color: #5A6482;
-  font-style: italic;
-  margin-top: 2px;
-}
-.pv-app-fields {
-  font-size: 10px;
-  color: #5A6482;
-  margin-top: 2px;
-}
-.pv-sec-comment {
-  padding: 6px 12px;
-  background: #F7F8FC;
-  border-top: 1px dashed #DDE3F0;
-  font-size: 10px;
-  color: #5A6482;
-  font-style: italic;
-}
-.pv-summary {
-  background: #142878;
-  color: #fff;
-  border-radius: 8px;
-  padding: 16px 18px;
-  margin-bottom: 20px;
-}
-.pv-summary-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: #00A0DC;
-  margin-bottom: 12px;
-}
-.pv-summary-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.pv-stat { text-align: center; }
-.pv-stat-val { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 800; }
-.pv-stat-label { font-size: 9px; color: rgba(255,255,255,0.5); font-family: 'Sora', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
-.pv-stat.s-pass .pv-stat-val { color: #6ee7b7; }
-.pv-stat.s-flag .pv-stat-val { color: #fcd34d; }
-.pv-stat.s-fail .pv-stat-val { color: #fca5a5; }
-.pv-rec-label { font-family: 'Sora', sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
-.pv-rec-text { font-size: 11px; color: rgba(255,255,255,0.9); line-height: 1.6; white-space: pre-wrap; }
-.pv-sig {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #DDE3F0;
-}
-.pv-sig-block { border-top: 1px solid #1A2340; padding-top: 6px; }
-.pv-sig-label { font-family: 'Sora', sans-serif; font-size: 9px; color: #9AA3BA; text-transform: uppercase; letter-spacing: 1px; }
-.pv-addr-full { grid-column: 1 / -1; }
-
-/* ── UTILITY ─────────────────────── */
-.hidden { display: none !important; }
-input::placeholder, textarea::placeholder { color: var(--gray-400); }
+.hidden{display:none!important;}
+input::placeholder,textarea::placeholder{color:var(--gray-400);}
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- SIDEBAR -->
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <div class="l-sub">Newera Property Management</div>
+  <div class="l-title">Loading Inspector Portal...</div>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen" class="hidden">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-co">Newera Property Management</div>
+      <div class="auth-title">Inspector Portal</div>
+      <div class="auth-sub">Property Walkthrough Checklist</div>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-signin" onclick="setAuthTab('signin')">Sign In</div>
+      <div class="auth-tab" id="tab-signup" onclick="setAuthTab('signup')">Create Account</div>
+    </div>
+    <div id="auth-error"></div>
+    <div class="auth-field" id="signup-name-wrap" style="display:none;">
+      <label>Your Name</label>
+      <input type="text" id="auth-name" placeholder="John Smith" autocomplete="name">
+    </div>
+    <div class="auth-field">
+      <label>Email Address</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="auth-btn" id="auth-btn" onclick="handleAuth()">Sign In</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
   <div id="sidebar">
     <div id="sidebar-brand">
       <div class="sub">Newera Property Management</div>
-      <div class="title">Property Walkthrough<br>Checklist</div>
+      <div class="title">Property Walkthrough</div>
     </div>
-
+    <div id="user-bar">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name-el">Inspector</div>
+        <div class="user-email" id="user-email-el"></div>
+      </div>
+      <button class="logout-btn" onclick="handleSignOut()" title="Sign out">⏻</button>
+    </div>
+    <div id="insp-switcher"></div>
     <div id="overall-progress">
       <div class="prog-bar-track"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
       <div class="prog-stats">
-        <span id="prog-text">0 / 0 reviewed</span>
+        <span id="prog-text">0/0 reviewed</span>
         <span class="s-pass" id="prog-pass">✓ 0</span>
         <span class="s-flag" id="prog-flag">⚠ 0</span>
         <span class="s-fail" id="prog-fail">✗ 0</span>
       </div>
     </div>
-
-    <div id="nav-list">
-      <div class="nav-item active" data-section="property" onclick="showSection('property')">
-        <span class="nav-icon">🏢</span>
-        <span class="nav-label">Property Info</span>
-      </div>
-      <!-- Section nav items injected by JS -->
-    </div>
-
+    <div id="nav-list"></div>
     <div id="sidebar-footer">
+      <div id="save-status"></div>
       <button id="btn-print" onclick="printAll()">🖨&nbsp; Print / Save PDF</button>
     </div>
   </div>
-
-  <!-- MAIN -->
   <div id="main">
     <div id="section-header">
       <span class="sec-icon" id="hdr-icon">🏢</span>
@@ -711,670 +281,669 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
       <span class="sec-sub" id="hdr-sub"></span>
       <div class="sec-badges" id="hdr-badges"></div>
     </div>
-
-    <div id="content-scroll">
-      <!-- panels injected by JS -->
-    </div>
+    <div id="content-scroll"></div>
   </div>
-</div><!-- /#app -->
+</div>
+
 <div id="print-view"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ─── DATA ────────────────────────────────────────────────────────────────────
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const SB_URL = 'https://bqptmeepsiudlqldznwv.supabase.co';
+const SB_KEY = 'sb_publishable_zftwVgpgRNNAVYZtASRVrQ_1mH84RSS';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+// ── SECTIONS ──────────────────────────────────────────────────────────────────
 const SECTIONS = [
-  {
-    id: "exterior", label: "Exterior & Curb Appeal", icon: "🏠",
-    items: [
-      { label: "Roof condition (missing shingles, sagging, visible damage)" },
-      { label: "Gutters & downspouts (attached, clear, no rust)" },
-      { label: "Fascia & soffit (no rot or pest damage)" },
-      { label: "Exterior paint or siding (peeling, cracks, warping)" },
-      { label: "Foundation (visible cracks, settling, drainage slope)" },
-      { label: "Driveway & walkways (cracks, trip hazards)" },
-      { label: "Landscaping (overgrowth, dead trees, drainage issues)" },
-      { label: "Fencing (condition, gates functional)" },
-      { label: "Garage door & opener functional", appliance: true },
-      { label: "Exterior lighting functional" },
-      { label: "Mailbox present and in good condition" },
-      { label: "Address numbers visible from street" },
-    ]
-  },
-  {
-    id: "interior", label: "Interior – General", icon: "🚪",
-    items: [
-      { label: "Front door locks, deadbolt, and weatherstripping" },
-      { label: "All interior doors open/close/latch properly" },
-      { label: "Walls – no holes, stains, or mold" },
-      { label: "Ceilings – no water stains, cracks, or sagging" },
-      { label: "Floors – no major damage, soft spots, or trip hazards" },
-      { label: "Windows open, close, lock, and seal properly" },
-      { label: "Window screens present and intact" },
-      { label: "Smoke detectors present and functional (per room)" },
-      { label: "Carbon monoxide detectors present (near sleeping areas)" },
-      { label: "Stairs – handrails secure, no broken treads" },
-      { label: "Attic access – visible signs of leaks or pests" },
-      { label: "Storage areas accessible and free of debris" },
-    ]
-  },
-  {
-    id: "kitchen", label: "Kitchen", icon: "🍳",
-    items: [
-      { label: "Appliances present per lease (refrigerator, range, dishwasher)" },
-      { label: "Range/oven burners functional", appliance: true },
-      { label: "Refrigerator cooling properly", appliance: true },
-      { label: "Dishwasher runs and drains", appliance: true },
-      { label: "Range hood & exhaust fan functional", appliance: true },
-      { label: "Garbage disposal functional (if present)", appliance: true },
-      { label: "Cabinet doors and drawers operate properly" },
-      { label: "Countertops – no cracks, burns, or water damage" },
-      { label: "Sink – faucet, hot/cold, adequate pressure" },
-      { label: "Sink drain – no leaks under cabinet" },
-      { label: "GFCI outlet present within 6 ft of sink" },
-      { label: "No signs of pest activity" },
-    ]
-  },
-  {
-    id: "bathrooms", label: "Bathrooms", icon: "🚿",
-    items: [
-      { label: "Toilet flushes and refills; no rocking or leaks at base" },
-      { label: "Sink faucet – hot/cold, adequate pressure" },
-      { label: "Sink drain functional, no leaks under cabinet" },
-      { label: "Tub/shower – hot/cold, adequate pressure" },
-      { label: "Tub/shower drain functional" },
-      { label: "Caulking around tub/shower intact (no mold gaps)" },
-      { label: "Exhaust fan functional" },
-      { label: "GFCI outlet present" },
-      { label: "Towel bars and toilet paper holder secure" },
-      { label: "Mirror and vanity in good condition" },
-      { label: "No signs of water damage on walls or floor" },
-      { label: "Storage functional (cabinet doors, drawers)" },
-    ]
-  },
-  {
-    id: "hvac", label: "HVAC & Utilities", icon: "❄️",
-    items: [
-      { label: "HVAC system turns on in heat and cool mode", appliance: true },
-      { label: "Air filter present – note condition and last change date" },
-      { label: "All vents present and unobstructed" },
-      { label: "Thermostat functional", appliance: true },
-      { label: "Water heater – no rust, leaks, or corrosion; age noted", appliance: true },
-      { label: "Washer hookup present and undamaged (if applicable)", appliance: true },
-      { label: "Dryer hookup present and undamaged (if applicable)", appliance: true },
-      { label: "Water pressure adequate throughout" },
-      { label: "No evidence of active plumbing leaks" },
-      { label: "Electrical panel – no tripped breakers, no burn marks" },
-      { label: "All outlets functional (spot check each room)" },
-      { label: "All light switches functional" },
-      { label: "Gas shut-off accessible and labeled (if applicable)" },
-    ]
-  },
-  {
-    id: "safety", label: "Safety & Compliance", icon: "🔒",
-    items: [
-      { label: "All exterior entry points lock securely" },
-      { label: "Peephole present and functional in all exterior entry doors" },
-      { label: "Window locks functional on all windows" },
-      { label: "Garage pedestrian door has keyed lock" },
-      { label: "Pool/spa fence & gate self-closing (if applicable)" },
-      { label: "No exposed wiring visible" },
-      { label: "No evidence of mold beyond normal surface level" },
-      { label: "No evidence of active pest infestation" },
-      { label: "Water heater T&P relief valve present" },
-      { label: "Proper egress windows in bedrooms" },
-      { label: "No standing water under/around property" },
-      { label: "Lead paint disclosure provided if pre-1978" },
-    ]
-  },
-  {
-    id: "owner_notes", label: "Owner Conversation Notes", icon: "📋",
-    items: [
-      { label: "Any known repairs completed in last 12 months" },
-      { label: "Any known deferred maintenance or issues" },
-      { label: "HOA rules or restrictions discussed" },
-      { label: "Pet policy agreed upon" },
-      { label: "Preferred communication method confirmed" },
-      { label: "Move-in timeline discussed" },
-      { label: "Key/access code handoff plan confirmed" },
-      { label: "Owner emergency contact collected" },
-    ]
-  },
+  { id:"exterior", label:"Exterior & Curb Appeal", icon:"🏠", items:[
+    {label:"Roof condition (missing shingles, sagging, visible damage)"},
+    {label:"Gutters & downspouts (attached, clear, no rust)"},
+    {label:"Fascia & soffit (no rot or pest damage)"},
+    {label:"Exterior paint or siding (peeling, cracks, warping)"},
+    {label:"Foundation (visible cracks, settling, drainage slope)"},
+    {label:"Driveway & walkways (cracks, trip hazards)"},
+    {label:"Landscaping (overgrowth, dead trees, drainage issues)"},
+    {label:"Fencing (condition, gates functional)"},
+    {label:"Garage door & opener functional", appliance:true},
+    {label:"Exterior lighting functional"},
+    {label:"Mailbox present and in good condition"},
+    {label:"Address numbers visible from street"},
+  ]},
+  { id:"interior", label:"Interior – General", icon:"🚪", items:[
+    {label:"Front door locks, deadbolt, and weatherstripping"},
+    {label:"All interior doors open/close/latch properly"},
+    {label:"Walls – no holes, stains, or mold"},
+    {label:"Ceilings – no water stains, cracks, or sagging"},
+    {label:"Floors – no major damage, soft spots, or trip hazards"},
+    {label:"Windows open, close, lock, and seal properly"},
+    {label:"Window screens present and intact"},
+    {label:"Smoke detectors present and functional (per room)"},
+    {label:"Carbon monoxide detectors present (near sleeping areas)"},
+    {label:"Stairs – handrails secure, no broken treads"},
+    {label:"Attic access – visible signs of leaks or pests"},
+    {label:"Storage areas accessible and free of debris"},
+  ]},
+  { id:"kitchen", label:"Kitchen", icon:"🍳", items:[
+    {label:"Appliances present per lease (refrigerator, range, dishwasher)"},
+    {label:"Range/oven burners functional", appliance:true},
+    {label:"Refrigerator cooling properly", appliance:true},
+    {label:"Dishwasher runs and drains", appliance:true},
+    {label:"Range hood & exhaust fan functional", appliance:true},
+    {label:"Garbage disposal functional (if present)", appliance:true},
+    {label:"Cabinet doors and drawers operate properly"},
+    {label:"Countertops – no cracks, burns, or water damage"},
+    {label:"Sink – faucet, hot/cold, adequate pressure"},
+    {label:"Sink drain – no leaks under cabinet"},
+    {label:"GFCI outlet present within 6 ft of sink"},
+    {label:"No signs of pest activity"},
+  ]},
+  { id:"bathrooms", label:"Bathrooms", icon:"🚿", items:[
+    {label:"Toilet flushes and refills; no rocking or leaks at base"},
+    {label:"Sink faucet – hot/cold, adequate pressure"},
+    {label:"Sink drain functional, no leaks under cabinet"},
+    {label:"Tub/shower – hot/cold, adequate pressure"},
+    {label:"Tub/shower drain functional"},
+    {label:"Caulking around tub/shower intact (no mold gaps)"},
+    {label:"Exhaust fan functional"},
+    {label:"GFCI outlet present"},
+    {label:"Towel bars and toilet paper holder secure"},
+    {label:"Mirror and vanity in good condition"},
+    {label:"No signs of water damage on walls or floor"},
+    {label:"Storage functional (cabinet doors, drawers)"},
+  ]},
+  { id:"hvac", label:"HVAC & Utilities", icon:"❄️", items:[
+    {label:"HVAC system turns on in heat and cool mode", appliance:true},
+    {label:"Air filter present – note condition and last change date"},
+    {label:"All vents present and unobstructed"},
+    {label:"Thermostat functional", appliance:true},
+    {label:"Water heater – no rust, leaks, or corrosion; age noted", appliance:true},
+    {label:"Washer hookup present and undamaged (if applicable)", appliance:true},
+    {label:"Dryer hookup present and undamaged (if applicable)", appliance:true},
+    {label:"Water pressure adequate throughout"},
+    {label:"No evidence of active plumbing leaks"},
+    {label:"Electrical panel – no tripped breakers, no burn marks"},
+    {label:"All outlets functional (spot check each room)"},
+    {label:"All light switches functional"},
+    {label:"Gas shut-off accessible and labeled (if applicable)"},
+  ]},
+  { id:"safety", label:"Safety & Compliance", icon:"🔒", items:[
+    {label:"All exterior entry points lock securely"},
+    {label:"Peephole present and functional in all exterior entry doors"},
+    {label:"Window locks functional on all windows"},
+    {label:"Garage pedestrian door has keyed lock"},
+    {label:"Pool/spa fence & gate self-closing (if applicable)"},
+    {label:"No exposed wiring visible"},
+    {label:"No evidence of mold beyond normal surface level"},
+    {label:"No evidence of active pest infestation"},
+    {label:"Water heater T&P relief valve present"},
+    {label:"Proper egress windows in bedrooms"},
+    {label:"No standing water under/around property"},
+    {label:"Lead paint disclosure provided if pre-1978"},
+  ]},
+  { id:"owner_notes", label:"Owner Conversation Notes", icon:"📋", items:[
+    {label:"Any known repairs completed in last 12 months"},
+    {label:"Any known deferred maintenance or issues"},
+    {label:"HOA rules or restrictions discussed"},
+    {label:"Pet policy agreed upon"},
+    {label:"Preferred communication method confirmed"},
+    {label:"Move-in timeline discussed"},
+    {label:"Key/access code handoff plan confirmed"},
+    {label:"Owner emergency contact collected"},
+  ]},
 ];
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
-const STATE_KEY = 'npm_checklist_v1';
-let state = loadState();
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentUser     = null;
+let activeInsp      = [];
+let completedInsp   = [];
+let currentId       = null;
+let state           = defaultState();
+let currentSection  = 'property';
+let saveTimer       = null;
+let isCompleted     = false;
 
 function defaultState() {
-  return {
-    prop: { address:'', owner:'', yearBuilt:'', beds:'', baths:'', date:'', inspector:'' },
-    checks: {},      // "sectionId__idx" -> "pass"|"flag"|"fail"|"na"
-    notes: {},       // "sectionId__idx" -> string
-    appliance: {},   // "sectionId__idx__field" -> string
-    sectionComments:{}, // sectionId -> string
-    summary: '',
-  };
+  return { prop:{address:'',owner:'',yearBuilt:'',beds:'',baths:'',date:'',inspector:''}, checks:{}, notes:{}, appliance:{}, sectionComments:{}, summary:'' };
 }
+const k    = (s,i)   => `${s}__${i}`;
+const kApp = (s,i,f) => `${s}__${i}__${f}`;
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STATE_KEY);
-    if (raw) return { ...defaultState(), ...JSON.parse(raw) };
-  } catch(e) {}
-  return defaultState();
-}
-
+// ── SAVE ──────────────────────────────────────────────────────────────────────
 function saveState() {
-  try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch(e) {}
+  if (!currentId || isCompleted) return;
+  setSaveStatus('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      const { error } = await sb.from('inspections').update({
+        data: state,
+        address: state.prop.address || 'New Inspection',
+        inspector_name: state.prop.inspector || '',
+      }).eq('id', currentId);
+      if (error) throw error;
+      const entry = activeInsp.find(i => i.id === currentId);
+      if (entry) { entry.address = state.prop.address || 'New Inspection'; buildSidebar(); }
+      setSaveStatus('saved');
+    } catch { setSaveStatus('error'); }
+  }, 1500);
 }
 
-const k = (sid, idx) => `${sid}__${idx}`;
-const kApp = (sid, idx, field) => `${sid}__${idx}__${field}`;
-
-// ─── STATS ───────────────────────────────────────────────────────────────────
-function calcStats() {
-  const total = SECTIONS.reduce((a,s) => a + s.items.length, 0);
-  let checked=0, pass=0, flag=0, fail=0;
-  Object.values(state.checks).forEach(v => {
-    if (v) { checked++; if(v==='pass') pass++; else if(v==='flag') flag++; else if(v==='fail') fail++; }
-  });
-  return { total, checked, pass, flag, fail };
+function setSaveStatus(s) {
+  const el = document.getElementById('save-status');
+  el.className = s;
+  el.textContent = s==='saving'?'● Saving…':s==='saved'?'✓ Saved':'⚠ Save failed';
+  if (s==='saved') setTimeout(()=>{ if(el.className==='saved') el.textContent=''; },3000);
 }
 
-function sectionStats(sec) {
-  let checked=0, pass=0, flag=0, fail=0;
-  sec.items.forEach((_, idx) => {
-    const v = state.checks[k(sec.id, idx)] || '';
-    if (v) { checked++; if(v==='pass') pass++; else if(v==='flag') flag++; else if(v==='fail') fail++; }
-  });
-  return { total: sec.items.length, checked, pass, flag, fail };
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+let authTab = 'signin';
+
+function setAuthTab(tab) {
+  authTab = tab;
+  document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  document.getElementById('signup-name-wrap').style.display = tab==='signup'?'block':'none';
+  document.getElementById('auth-btn').textContent = tab==='signin'?'Sign In':'Create Account';
+  clearAuthError();
+}
+function showAuthError(msg) { const e=document.getElementById('auth-error'); e.textContent=msg; e.style.display='block'; }
+function clearAuthError()   { document.getElementById('auth-error').style.display='none'; }
+
+async function handleAuth() {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const name     = document.getElementById('auth-name').value.trim();
+  const btn      = document.getElementById('auth-btn');
+  clearAuthError();
+  if (!email||!password) { showAuthError('Please enter your email and password.'); return; }
+  if (authTab==='signup'&&!name) { showAuthError('Please enter your name.'); return; }
+  btn.disabled = true;
+  btn.textContent = authTab==='signin'?'Signing in…':'Creating account…';
+  try {
+    if (authTab==='signin') {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    } else {
+      const { data, error } = await sb.auth.signUp({ email, password, options:{ data:{ full_name:name } } });
+      if (error) throw error;
+      if (data.user && !data.session) {
+        showAuthError('Check your email to confirm your account, then sign in.');
+        btn.disabled=false; btn.textContent='Create Account'; return;
+      }
+    }
+  } catch(e) {
+    showAuthError(e.message||'Authentication failed.');
+    btn.disabled=false; btn.textContent=authTab==='signin'?'Sign In':'Create Account';
+  }
 }
 
-// ─── RENDER HELPERS ──────────────────────────────────────────────────────────
-function el(tag, attrs={}, ...children) {
-  const e = document.createElement(tag);
-  Object.entries(attrs).forEach(([k,v]) => {
-    if (k === 'className') e.className = v;
-    else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
-    else e.setAttribute(k, v);
+async function handleSignOut() {
+  await sb.auth.signOut();
+}
+
+// ── INSPECTION CRUD ───────────────────────────────────────────────────────────
+async function loadAll() {
+  const { data } = await sb.from('inspections')
+    .select('id,address,inspector_name,status,data,created_at,updated_at')
+    .eq('user_id', currentUser.id)
+    .order('updated_at', { ascending:false });
+  activeInsp    = (data||[]).filter(i=>i.status==='active');
+  completedInsp = (data||[]).filter(i=>i.status==='completed');
+}
+
+async function createNew() {
+  const defData = defaultState();
+  defData.prop.inspector = currentUser.user_metadata?.full_name||'';
+  const { data, error } = await sb.from('inspections').insert({
+    user_id:currentUser.id, address:'New Inspection',
+    inspector_name:currentUser.user_metadata?.full_name||'',
+    status:'active', data:defData,
+  }).select().single();
+  if (error) { console.error(error); return null; }
+  activeInsp.unshift(data);
+  return data;
+}
+
+async function deleteInsp(id) {
+  if (!confirm('Delete this inspection? This cannot be undone.')) return;
+  await sb.from('inspections').delete().eq('id',id);
+  activeInsp    = activeInsp.filter(i=>i.id!==id);
+  completedInsp = completedInsp.filter(i=>i.id!==id);
+  if (currentId===id) {
+    if (activeInsp.length>0) switchTo(activeInsp[0].id);
+    else { const n=await createNew(); if(n) switchTo(n.id); }
+  } else buildSidebar();
+}
+
+async function markComplete() {
+  if (!confirm('Mark this inspection as complete and archive it?')) return;
+  await sb.from('inspections').update({status:'completed'}).eq('id',currentId);
+  const insp=activeInsp.find(i=>i.id===currentId);
+  if(insp){insp.status='completed';completedInsp.unshift(insp);activeInsp=activeInsp.filter(i=>i.id!==currentId);}
+  if(activeInsp.length>0) switchTo(activeInsp[0].id);
+  else { const n=await createNew(); if(n) switchTo(n.id); }
+}
+
+async function reopenInsp(id) {
+  await sb.from('inspections').update({status:'active'}).eq('id',id);
+  const insp=completedInsp.find(i=>i.id===id);
+  if(insp){insp.status='active';activeInsp.unshift(insp);completedInsp=completedInsp.filter(i=>i.id!==id);}
+  switchTo(id);
+}
+
+function switchTo(id) {
+  currentId = id;
+  const all = [...activeInsp,...completedInsp];
+  const insp = all.find(i=>i.id===id);
+  state = insp?.data?{...defaultState(),...insp.data}:defaultState();
+  isCompleted = insp?.status==='completed';
+  currentSection = 'property';
+  buildSidebar(); updateProgress(); renderContent();
+}
+
+// ── SESSION INIT ──────────────────────────────────────────────────────────────
+async function initSession(user) {
+  currentUser = user;
+  showScreen('loading');
+  const name    = user.user_metadata?.full_name||user.email.split('@')[0];
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-name-el').textContent = name;
+  document.getElementById('user-email-el').textContent = user.email;
+  await loadAll();
+  if (activeInsp.length===0) { const n=await createNew(); if(n) currentId=n.id; }
+  else currentId=activeInsp[0].id;
+  const insp=activeInsp.find(i=>i.id===currentId);
+  state=insp?.data?{...defaultState(),...insp.data}:defaultState();
+  isCompleted=false;
+  showScreen('app');
+  buildSidebar(); updateProgress(); renderContent();
+}
+
+function showScreen(which) {
+  document.getElementById('loading-screen').classList.toggle('hidden', which!=='loading');
+  document.getElementById('auth-screen').classList.toggle('hidden',   which!=='auth');
+  document.getElementById('app').classList.toggle('hidden',           which!=='app');
+  document.body.style.overflow = which==='app'?'hidden':'';
+}
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) await initSession(session.user);
+  else { currentUser=null; showScreen('auth'); }
+});
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function calcStats(s=state) {
+  const total=SECTIONS.reduce((a,sec)=>a+sec.items.length,0);
+  let checked=0,pass=0,flag=0,fail=0;
+  Object.values(s.checks||{}).forEach(v=>{if(v){checked++;if(v==='pass')pass++;else if(v==='flag')flag++;else if(v==='fail')fail++;}});
+  return{total,checked,pass,flag,fail};
+}
+function secStats(sec) {
+  let checked=0,pass=0,flag=0,fail=0;
+  sec.items.forEach((_,idx)=>{const v=state.checks[k(sec.id,idx)]||'';if(v){checked++;if(v==='pass')pass++;else if(v==='flag')flag++;else if(v==='fail')fail++;}});
+  return{total:sec.items.length,checked,pass,flag,fail};
+}
+
+// ── RENDER HELPERS ────────────────────────────────────────────────────────────
+function el(tag,attrs={},...ch){
+  const e=document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v])=>{
+    if(k==='className')e.className=v;
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v);
   });
-  children.flat().forEach(c => {
-    if (c == null) return;
-    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  });
+  ch.flat().forEach(c=>{if(c==null)return;e.appendChild(typeof c==='string'?document.createTextNode(c):c);});
   return e;
 }
-
-function inp(placeholder, value, onChange, type='text', extraClass='') {
-  const i = document.createElement('input');
-  i.type = type; i.placeholder = placeholder || ''; i.value = value || '';
-  if (extraClass) i.className = extraClass;
-  i.addEventListener('input', e => onChange(e.target.value));
+function inp(ph,val,onChange,type='text'){
+  const i=document.createElement('input');
+  i.type=type;i.placeholder=ph||'';i.value=val||'';
+  i.addEventListener('input',e=>onChange(e.target.value));
   return i;
 }
-
-function textarea(placeholder, value, onChange, className='') {
-  const t = document.createElement('textarea');
-  t.placeholder = placeholder; t.value = value || '';
-  if (className) t.className = className;
-  t.addEventListener('input', e => onChange(e.target.value));
+function ta(ph,val,onChange,cls=''){
+  const t=document.createElement('textarea');
+  t.placeholder=ph;t.value=val||'';if(cls)t.className=cls;
+  t.addEventListener('input',e=>onChange(e.target.value));
   return t;
 }
-
-function field(labelText, inputEl, fullWidth=false) {
-  const d = el('div', { className: 'field' + (fullWidth ? ' field-full' : '') });
-  d.appendChild(el('label', {}, labelText));
-  d.appendChild(inputEl);
-  return d;
+function fld(label,inputEl,full=false){
+  const d=el('div',{className:'field'+(full?' field-full':'')});
+  d.appendChild(el('label',{},label));d.appendChild(inputEl);return d;
 }
 
-// ─── NAV ─────────────────────────────────────────────────────────────────────
-let currentSection = 'property';
-
-function showSection(id) {
-  currentSection = id;
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === id));
-  renderContent();
-  document.getElementById('content-scroll').scrollTop = 0;
-}
-
-function buildNav() {
-  const nav = document.getElementById('nav-list');
-  // Keep the property info item (first child), rebuild the rest
-  while (nav.children.length > 1) nav.removeChild(nav.lastChild);
-
-  SECTIONS.forEach(sec => {
-    const st = sectionStats(sec);
-    const item = el('div', { className: 'nav-item', 'data-section': sec.id, onclick: () => showSection(sec.id) },
-      el('span', { className: 'nav-icon' }, sec.icon),
-      el('span', { className: 'nav-label' }, sec.label),
-      el('span', { className: 'nav-count' }, `${st.checked}/${st.total}`),
-    );
-    const badges = el('div', { className: 'nav-badges' });
-    if (st.fail > 0) badges.appendChild(el('span', { className: 'nav-badge fail' }, `✗${st.fail}`));
-    if (st.flag > 0) badges.appendChild(el('span', { className: 'nav-badge flag' }, `⚠${st.flag}`));
-    if (badges.children.length) item.appendChild(badges);
-    nav.appendChild(item);
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  // Inspection switcher
+  const sw=document.getElementById('insp-switcher');
+  sw.innerHTML='';
+  const hdr=el('div',{className:'insp-switcher-header'});
+  hdr.appendChild(el('div',{className:'insp-switcher-label'},'In Progress'));
+  if(!isCompleted){
+    hdr.appendChild(el('button',{className:'insp-new-btn',onclick:async()=>{const n=await createNew();if(n)switchTo(n.id);}},'+  New'));
+  }
+  sw.appendChild(hdr);
+  const list=el('div',{className:'insp-list'});
+  if(activeInsp.length===0){
+    list.appendChild(el('div',{style:'font-size:11px;color:rgba(255,255,255,0.3);padding:4px 8px;'},'No active inspections'));
+  }
+  activeInsp.forEach(insp=>{
+    const isCur=insp.id===currentId&&!isCompleted;
+    const row=el('div',{className:'insp-row'+(isCur?' active':''),onclick:()=>switchTo(insp.id)});
+    const lbl=insp.address||'New Inspection';
+    row.appendChild(el('span',{className:'insp-row-label'},lbl.length>22?lbl.slice(0,22)+'…':lbl));
+    row.appendChild(el('button',{className:'insp-row-del',onclick:(e)=>{e.stopPropagation();deleteInsp(insp.id);}},'×'));
+    list.appendChild(row);
   });
+  sw.appendChild(list);
 
-  // Summary nav item
-  const sumItem = el('div', { className: 'nav-item', 'data-section': 'summary', onclick: () => showSection('summary') },
-    el('span', { className: 'nav-icon' }, '📊'),
-    el('span', { className: 'nav-label' }, 'Summary'),
-  );
-  nav.appendChild(sumItem);
-
-  // Re-mark active
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === currentSection));
+  // Nav
+  const nav=document.getElementById('nav-list');
+  nav.innerHTML='';
+  const navItem=(icon,label,secId,count,badges)=>{
+    const item=el('div',{className:`nav-item${currentSection===secId?' active':''}`,onclick:()=>showSection(secId)});
+    item.appendChild(el('span',{className:'nav-icon'},icon));
+    item.appendChild(el('span',{className:'nav-label'},label));
+    if(count!=null)item.appendChild(el('span',{className:'nav-count'},count));
+    if(badges){const bd=el('div',{className:'nav-badges'});badges.forEach(b=>bd.appendChild(b));if(bd.children.length)item.appendChild(bd);}
+    return item;
+  };
+  if(!isCompleted){
+    nav.appendChild(navItem('🏢','Property Info','property'));
+    SECTIONS.forEach(sec=>{
+      const ss=secStats(sec);
+      const badges=[];
+      if(ss.fail>0)badges.push(el('span',{className:'nav-badge fail'},`✗${ss.fail}`));
+      if(ss.flag>0)badges.push(el('span',{className:'nav-badge flag'},`⚠${ss.flag}`));
+      nav.appendChild(navItem(sec.icon,sec.label,sec.id,`${ss.checked}/${ss.total}`,badges));
+    });
+    nav.appendChild(navItem('📊','Summary','summary'));
+  } else {
+    nav.appendChild(navItem('🏢','Property Info (Read Only)','property'));
+    nav.appendChild(navItem('📊','Summary (Read Only)','summary'));
+  }
+  nav.appendChild(navItem('✅','Completed Inspections','completed',String(completedInsp.length)));
 }
 
 function updateProgress() {
-  const st = calcStats();
-  const pct = st.total ? Math.round(st.checked / st.total * 100) : 0;
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-text').textContent = `${st.checked} / ${st.total} reviewed`;
-  document.getElementById('prog-pass').textContent = `✓ ${st.pass}`;
-  document.getElementById('prog-flag').textContent = `⚠ ${st.flag}`;
-  document.getElementById('prog-fail').textContent = `✗ ${st.fail}`;
+  if(isCompleted)return;
+  const st=calcStats();
+  const pct=st.total?Math.round(st.checked/st.total*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=`${st.checked}/${st.total} reviewed`;
+  document.getElementById('prog-pass').textContent=`✓ ${st.pass}`;
+  document.getElementById('prog-flag').textContent=`⚠ ${st.flag}`;
+  document.getElementById('prog-fail').textContent=`✗ ${st.fail}`;
 }
 
-// ─── SECTION HEADER ──────────────────────────────────────────────────────────
-function updateSectionHeader(title, icon, sub, secId) {
-  document.getElementById('hdr-icon').textContent = icon;
-  document.getElementById('hdr-title').textContent = title;
-  document.getElementById('hdr-sub').textContent = sub || '';
-  const badges = document.getElementById('hdr-badges');
-  badges.innerHTML = '';
-  if (secId) {
-    const sec = SECTIONS.find(s => s.id === secId);
-    if (sec) {
-      const st = sectionStats(sec);
-      if (st.fail > 0) badges.appendChild(el('span', { className: 'sec-badge fail' }, `✗ ${st.fail} failed`));
-      if (st.flag > 0) badges.appendChild(el('span', { className: 'sec-badge flag' }, `⚠ ${st.flag} flagged`));
-    }
-  }
+function showSection(id) {
+  currentSection=id;buildSidebar();
+  document.getElementById('content-scroll').scrollTop=0;
+  renderContent();
 }
 
-// ─── RENDER CONTENT ──────────────────────────────────────────────────────────
+function setHdr(title,icon,sub,secId) {
+  document.getElementById('hdr-icon').textContent=icon;
+  document.getElementById('hdr-title').textContent=title;
+  document.getElementById('hdr-sub').textContent=sub||'';
+  const bd=document.getElementById('hdr-badges');bd.innerHTML='';
+  if(secId){const sec=SECTIONS.find(s=>s.id===secId);if(sec){const ss=secStats(sec);if(ss.fail>0)bd.appendChild(el('span',{className:'sec-badge fail'},`✗ ${ss.fail} failed`));if(ss.flag>0)bd.appendChild(el('span',{className:'sec-badge flag'},`⚠ ${ss.flag} flagged`));}}
+}
+
+// ── CONTENT ───────────────────────────────────────────────────────────────────
 function renderContent() {
-  const scroll = document.getElementById('content-scroll');
-  scroll.innerHTML = '';
-
-  if (currentSection === 'property') {
-    updateSectionHeader('Property Information', '🏢', '');
-    scroll.appendChild(renderPropertyPanel());
-  } else if (currentSection === 'summary') {
-    updateSectionHeader('Inspection Summary', '📊', '');
-    scroll.appendChild(renderSummaryPanel());
-  } else {
-    const sec = SECTIONS.find(s => s.id === currentSection);
-    if (sec) {
-      const st = sectionStats(sec);
-      updateSectionHeader(sec.label, sec.icon, `${st.checked} of ${st.total} reviewed`, sec.id);
-      scroll.appendChild(renderChecklistPanel(sec));
-    }
-  }
+  const scroll=document.getElementById('content-scroll');
+  scroll.innerHTML='';
+  if(currentSection==='property'){setHdr('Property Information','🏢','');scroll.appendChild(renderPropPanel());}
+  else if(currentSection==='summary'){setHdr('Inspection Summary','📊','');scroll.appendChild(renderSummaryPanel());}
+  else if(currentSection==='completed'){setHdr('Completed Inspections','✅',`${completedInsp.length} inspection${completedInsp.length!==1?'s':''}`);scroll.appendChild(renderCompletedPanel());}
+  else{const sec=SECTIONS.find(s=>s.id===currentSection);if(sec){const ss=secStats(sec);setHdr(sec.label,sec.icon,`${ss.checked} of ${ss.total} reviewed`,sec.id);scroll.appendChild(renderChecklist(sec));}}
 }
 
-// ─── PROPERTY PANEL ──────────────────────────────────────────────────────────
-function renderPropertyPanel() {
-  const panel = el('div', { id: 'prop-panel' });
-
-  const card1 = el('div', { className: 'info-card' });
-  card1.appendChild(el('div', { className: 'card-title' }, 'Property Details'));
-
-  const g1 = el('div', { className: 'field-grid cols2' });
-
-  const addrInp = inp('123 Main St, San Antonio TX', state.prop.address, v => { state.prop.address=v; saveState(); });
-  g1.appendChild(field('Property Address', addrInp, true));
-
-  const ownerInp = inp('John Smith', state.prop.owner, v => { state.prop.owner=v; saveState(); });
-  g1.appendChild(field('Owner Name', ownerInp));
-
-  const ybInp = inp('e.g. 1998', state.prop.yearBuilt, v => { state.prop.yearBuilt=v; saveState(); }, 'number');
-  g1.appendChild(field('Year Built', ybInp));
-
-  const bedsInp = inp('e.g. 3', state.prop.beds, v => { state.prop.beds=v; saveState(); }, 'number');
-  g1.appendChild(field('Bedrooms', bedsInp));
-
-  const bathsInp = inp('e.g. 2.5', state.prop.baths, v => { state.prop.baths=v; saveState(); }, 'number');
-  g1.appendChild(field('Bathrooms', bathsInp));
-
-  const dateInp = inp('', state.prop.date, v => { state.prop.date=v; saveState(); }, 'date');
-  g1.appendChild(field('Inspection Date', dateInp));
-
-  const inspInp = inp('NPM Team Member', state.prop.inspector, v => { state.prop.inspector=v; saveState(); });
-  g1.appendChild(field('Inspected By', inspInp));
-
-  card1.appendChild(g1);
-  panel.appendChild(card1);
-
-  // Instructions card
-  const card2 = el('div', { className: 'info-card' });
-  card2.appendChild(el('div', { className: 'card-title' }, 'How to Use'));
-  const ul = el('ul', { style: 'padding-left:18px; line-height:2; color:var(--gray-600); font-size:14px;' });
-  [
-    'Tap a section in the left sidebar to navigate.',
-    'Mark each item Pass, Flag, Warn, or N/A.',
-    'Flagged or failed items auto-reveal a note field.',
-    'Appliance items include Brand / Model / Serial # fields.',
-    'Each section has a comment box for general observations.',
-    'Your progress saves automatically to this device.',
-    'Tap Print / Save PDF to export a copy.',
-  ].forEach(t => ul.appendChild(el('li', {}, t)));
-  card2.appendChild(ul);
-  panel.appendChild(card2);
-
+// PROPERTY PANEL
+function renderPropPanel() {
+  const panel=el('div',{id:'prop-panel',style:'display:flex;flex-direction:column;gap:16px;'});
+  if(isCompleted){
+    const banner=el('div',{style:'background:#e7f6ef;border:1px solid #86efac;border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;'});
+    banner.appendChild(el('div',{style:'font-family:Sora,sans-serif;font-size:13px;font-weight:700;color:#0f7b4e;'},'✅ Completed Inspection — Read Only'));
+    banner.appendChild(el('button',{style:'background:#0f7b4e;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Sora,sans-serif;font-size:12px;font-weight:700;cursor:pointer;',onclick:()=>reopenInsp(currentId)},'Reopen'));
+    panel.appendChild(banner);
+  }
+  const card=el('div',{className:'info-card'});
+  card.appendChild(el('div',{className:'card-title'},'Property Details'));
+  const g=el('div',{className:'field-grid cols2'});
+  [{k:'address',label:'Property Address',ph:'123 Main St, San Antonio TX',full:true},
+   {k:'owner',label:'Owner Name',ph:'John Smith'},
+   {k:'yearBuilt',label:'Year Built',ph:'e.g. 1998',type:'number'},
+   {k:'beds',label:'Bedrooms',ph:'e.g. 3',type:'number'},
+   {k:'baths',label:'Bathrooms',ph:'e.g. 2.5',type:'number'},
+   {k:'date',label:'Inspection Date',type:'date'},
+   {k:'inspector',label:'Inspected By',ph:'NPM Team Member'},
+  ].forEach(f=>{
+    const i=inp(f.ph||'',state.prop[f.k],v=>{state.prop[f.k]=v;saveState();},f.type||'text');
+    if(isCompleted)i.readOnly=true;
+    g.appendChild(fld(f.label,i,f.full));
+  });
+  card.appendChild(g);panel.appendChild(card);
   return panel;
 }
 
-// ─── CHECKLIST PANEL ─────────────────────────────────────────────────────────
-function renderChecklistPanel(sec) {
-  const panel = el('div', { id: 'check-panel' });
-
-  sec.items.forEach((item, idx) => {
-    const itemKey = k(sec.id, idx);
-    const curVal = state.checks[itemKey] || '';
-    const curNote = state.notes[itemKey] || '';
-
-    const card = el('div', { className: `check-item status-${curVal}` });
-
-    // Top row
-    const top = el('div', { className: 'check-top' });
-
-    // Label
-    const labelWrap = el('div', { className: 'check-label' }, item.label);
-    if (item.appliance) labelWrap.appendChild(el('span', { className: 'appliance-badge' }, 'Appliance'));
-    top.appendChild(labelWrap);
-
-    // Status buttons
-    const btns = el('div', { className: 'status-btns' });
-    [
-      { key:'pass', label:'✓ Pass' },
-      { key:'flag', label:'⚠ Flag' },
-      { key:'fail', label:'✗ Fail' },
-      { key:'na',   label:'N/A' },
-    ].forEach(({ key, label }) => {
-      const btn = el('button', {
-        className: `status-btn${curVal === key ? ` active-${key}` : ''}`,
-        onclick: () => {
-          const newVal = state.checks[itemKey] === key ? '' : key;
-          state.checks[itemKey] = newVal;
-          saveState();
-          buildNav(); updateProgress(); renderContent();
-        }
-      }, label);
-      btns.appendChild(btn);
-    });
-    top.appendChild(btns);
-    card.appendChild(top);
-
-    // Appliance fields
-    if (item.appliance) {
-      const af = el('div', { className: 'appliance-fields' });
-      af.appendChild(el('div', { className: 'appliance-fields-title' }, 'Equipment Details'));
-      const grid = el('div', { className: 'appliance-fields-grid' });
-      [
-        { f:'Brand',    ph:'e.g. Lennox' },
-        { f:'Model',    ph:'e.g. XC21-060' },
-        { f:'Serial #', ph:'e.g. 5107A12345' },
-      ].forEach(({ f, ph }) => {
-        const aKey = kApp(sec.id, idx, f);
-        const aInp = inp(ph, state.appliance[aKey] || '', v => { state.appliance[aKey]=v; saveState(); });
-        grid.appendChild(field(f, aInp));
+// CHECKLIST PANEL
+function renderChecklist(sec) {
+  const panel=el('div',{id:'check-panel'});
+  const ro=isCompleted;
+  sec.items.forEach((item,idx)=>{
+    const ik=k(sec.id,idx);
+    const val=state.checks[ik]||'';
+    const note=state.notes[ik]||'';
+    const card=el('div',{className:`check-item status-${val}`});
+    const top=el('div',{className:'check-top'});
+    const lbl=el('div',{className:'check-label'},item.label);
+    if(item.appliance)lbl.appendChild(el('span',{className:'appliance-badge'},'Appliance'));
+    top.appendChild(lbl);
+    if(!ro){
+      const btns=el('div',{className:'status-btns'});
+      [{key:'pass',label:'✓ Pass'},{key:'flag',label:'⚠ Flag'},{key:'fail',label:'✗ Fail'},{key:'na',label:'N/A'}].forEach(({key,label})=>{
+        btns.appendChild(el('button',{className:`status-btn${val===key?` active-${key}`:''}`,onclick:()=>{
+          state.checks[ik]=state.checks[ik]===key?'':key;
+          saveState();buildSidebar();updateProgress();renderContent();
+        }},label));
       });
-      af.appendChild(grid);
-      card.appendChild(af);
+      top.appendChild(btns);
+    } else {
+      const statusLabels={pass:'✓ Pass',flag:'⚠ Flag',fail:'✗ Fail',na:'N/A','':'—'};
+      const statusCls={pass:'active-pass',flag:'active-flag',fail:'active-fail',na:'active-na'};
+      top.appendChild(el('div',{className:`status-btn ${statusCls[val]||''}`,style:'pointer-events:none;'},statusLabels[val]||'—'));
     }
-
-    // Note field — shown when flagged/failed or note exists
-    if (curVal === 'flag' || curVal === 'fail' || curNote) {
-      const noteEl = textarea(
-        'Note: repair needed, follow-up action, estimated cost...',
-        curNote,
-        v => { state.notes[itemKey]=v; saveState(); },
-        'item-note'
-      );
-      noteEl.style.borderColor = curVal === 'fail' ? '#fca5a5' : curVal === 'flag' ? '#fcd34d' : 'var(--gray-200)';
-      card.appendChild(noteEl);
+    card.appendChild(top);
+    if(item.appliance){
+      const af=el('div',{className:'appliance-fields'});
+      af.appendChild(el('div',{className:'appliance-fields-title'},'Equipment Details'));
+      const grid=el('div',{className:'appliance-fields-grid'});
+      [{f:'Brand',ph:'e.g. Lennox'},{f:'Model',ph:'e.g. XC21-060'},{f:'Serial #',ph:'e.g. 5107A12345'}].forEach(({f,ph})=>{
+        const ak=kApp(sec.id,idx,f);
+        const i=inp(ph,state.appliance[ak]||'',v=>{state.appliance[ak]=v;saveState();});
+        if(ro)i.readOnly=true;
+        grid.appendChild(fld(f,i));
+      });
+      af.appendChild(grid);card.appendChild(af);
     }
-
+    if(!ro&&(val==='flag'||val==='fail'||note)){
+      const ni=el('input',{type:'text',className:'item-note',placeholder:'Note: repair needed, follow-up, estimated cost…'});
+      ni.value=note;ni.style.borderColor=val==='fail'?'#fca5a5':val==='flag'?'#fcd34d':'var(--gray-200)';
+      ni.addEventListener('input',e=>{state.notes[ik]=e.target.value;saveState();});
+      card.appendChild(ni);
+    } else if(ro&&note){
+      card.appendChild(el('div',{style:'font-size:13px;color:var(--gray-600);font-style:italic;margin-top:8px;'},`→ ${note}`));
+    }
     panel.appendChild(card);
   });
-
-  // Section comment box
-  const commentBox = el('div', { className: 'section-comment-box' });
-  const commentLabel = el('label', {}, '📝 ', 'Section Comments');
-  commentBox.appendChild(commentLabel);
-  commentBox.appendChild(textarea(
-    `General observations or follow-up notes for ${sec.label}...`,
-    state.sectionComments[sec.id] || '',
-    v => { state.sectionComments[sec.id]=v; saveState(); }
-  ));
-  panel.appendChild(commentBox);
-
+  // Section comment
+  const cb=el('div',{className:'section-comment-box'});
+  cb.appendChild(el('label',{},'📝 Section Comments'));
+  const t=ta(`General observations for ${sec.label}…`,state.sectionComments[sec.id]||'',v=>{state.sectionComments[sec.id]=v;saveState();});
+  if(ro)t.readOnly=true;
+  cb.appendChild(t);panel.appendChild(cb);
   return panel;
 }
 
-// ─── SUMMARY PANEL ───────────────────────────────────────────────────────────
+// SUMMARY PANEL
 function renderSummaryPanel() {
-  const panel = el('div', { id: 'summary-panel' });
-  const st = calcStats();
-
-  // Stat cards
-  const statsRow = el('div', { className: 'summary-stats' });
-  [
-    { cls:'s-total', val:st.total,   label:'Total' },
-    { cls:'s-pass',  val:st.pass,    label:'Passed' },
-    { cls:'s-flag',  val:st.flag,    label:'Flagged' },
-    { cls:'s-fail',  val:st.fail,    label:'Failed' },
-  ].forEach(({ cls, val, label }) => {
-    const c = el('div', { className: `stat-card ${cls}` });
-    c.appendChild(el('div', { className: 'stat-val' }, String(val)));
-    c.appendChild(el('div', { className: 'stat-label' }, label));
-    statsRow.appendChild(c);
+  const panel=el('div',{id:'summary-panel'});
+  const st=calcStats();
+  // Stats
+  const sr=el('div',{className:'summary-stats'});
+  [{cls:'s-total',val:st.total,label:'Total'},{cls:'s-pass',val:st.pass,label:'Passed'},{cls:'s-flag',val:st.flag,label:'Flagged'},{cls:'s-fail',val:st.fail,label:'Failed'}].forEach(({cls,val,label})=>{
+    const c=el('div',{className:`stat-card ${cls}`});
+    c.appendChild(el('div',{className:'stat-val'},String(val)));
+    c.appendChild(el('div',{className:'stat-label'},label));
+    sr.appendChild(c);
   });
-  panel.appendChild(statsRow);
-
-  // Per-section rows
-  const secCard = el('div', { className: 'info-card' });
-  secCard.appendChild(el('div', { className: 'card-title' }, 'Section Breakdown'));
-  SECTIONS.forEach(sec => {
-    const ss = sectionStats(sec);
-    const pct = ss.total ? Math.round(ss.checked / ss.total * 100) : 0;
-    const row = el('div', { className: 'summary-section-row' });
-    row.appendChild(el('span', { className: 'ssr-icon' }, sec.icon));
-    row.appendChild(el('span', { className: 'ssr-label' }, sec.label));
-    const prog = el('div', { className: 'ssr-prog' });
-    const track = el('div', { className: 'ssr-bar-track' });
-    const fill = el('div', { className: 'ssr-bar-fill', style: `width:${pct}%` });
-    track.appendChild(fill);
-    prog.appendChild(track);
-    prog.appendChild(el('span', { className: 'ssr-count' }, `${ss.checked}/${ss.total}`));
+  panel.appendChild(sr);
+  // Section breakdown
+  const sc=el('div',{className:'info-card'});
+  sc.appendChild(el('div',{className:'card-title'},'Section Breakdown'));
+  SECTIONS.forEach(sec=>{
+    const ss=secStats(sec);const pct=ss.total?Math.round(ss.checked/ss.total*100):0;
+    const row=el('div',{className:'summary-section-row'});
+    row.appendChild(el('span',{className:'ssr-icon'},sec.icon));
+    row.appendChild(el('span',{className:'ssr-label'},sec.label));
+    const prog=el('div',{style:'display:flex;align-items:center;gap:8px;'});
+    const track=el('div',{className:'ssr-bar-track'});
+    track.appendChild(el('div',{className:'ssr-bar-fill',style:`width:${pct}%`}));
+    prog.appendChild(track);prog.appendChild(el('span',{className:'ssr-count'},`${ss.checked}/${ss.total}`));
     row.appendChild(prog);
-    const badges = el('div', { className: 'ssr-badges' });
-    if (ss.fail > 0) badges.appendChild(el('span', { className: 'nav-badge fail' }, `✗${ss.fail}`));
-    if (ss.flag > 0) badges.appendChild(el('span', { className: 'nav-badge flag' }, `⚠${ss.flag}`));
-    row.appendChild(badges);
-    secCard.appendChild(row);
+    const bd=el('div',{className:'ssr-badges'});
+    if(ss.fail>0)bd.appendChild(el('span',{className:'nav-badge fail'},`✗${ss.fail}`));
+    if(ss.flag>0)bd.appendChild(el('span',{className:'nav-badge flag'},`⚠${ss.flag}`));
+    row.appendChild(bd);sc.appendChild(row);
   });
-  panel.appendChild(secCard);
-
-  // Overall recommendation
-  const recCard = el('div', { className: 'info-card' });
-  recCard.appendChild(el('div', { className: 'card-title' }, 'Overall Recommendation'));
-  recCard.appendChild(textarea(
-    'Summarize overall condition, move-in timeline, deal-breakers, and owner commitments required before signing the management agreement...',
-    state.summary,
-    v => { state.summary=v; saveState(); }
-  ));
-  panel.appendChild(recCard);
-
-  // Reset button
-  const resetCard = el('div', { className: 'info-card', style: 'border-color:#fca5a5;' });
-  resetCard.appendChild(el('div', { className: 'card-title', style: 'color:#b91c1c;' }, 'Reset Checklist'));
-  resetCard.appendChild(el('p', { style: 'font-size:14px; color:var(--gray-600); margin-bottom:14px;' }, 'Clears all data and starts a fresh inspection. This cannot be undone.'));
-  const resetBtn = el('button', {
-    style: 'background:#fff; border:1.5px solid #fca5a5; color:#b91c1c; border-radius:10px; padding:12px 24px; font-family:Sora,sans-serif; font-size:13px; font-weight:700; cursor:pointer; min-height:48px;',
-    onclick: () => {
-      if (confirm('Reset all checklist data? This cannot be undone.')) {
-        state = defaultState();
-        localStorage.removeItem(STATE_KEY);
-        showSection('property');
-        buildNav(); updateProgress();
-      }
-    }
-  }, '🗑 Reset All Data');
-  resetCard.appendChild(resetBtn);
-  panel.appendChild(resetCard);
-
+  panel.appendChild(sc);
+  // Recommendation
+  const rc=el('div',{className:'info-card'});
+  rc.appendChild(el('div',{className:'card-title'},'Overall Recommendation'));
+  const t=ta('Summarize overall condition, move-in timeline, deal-breakers…',state.summary,v=>{state.summary=v;saveState();});
+  if(isCompleted)t.readOnly=true;
+  rc.appendChild(t);panel.appendChild(rc);
+  // Complete / Reopen
+  if(!isCompleted){
+    const cc=el('div',{className:'info-card',style:'border-color:#86efac;'});
+    cc.appendChild(el('div',{className:'card-title',style:'color:var(--green);'},'Finalize Inspection'));
+    cc.appendChild(el('p',{style:'font-size:14px;color:var(--gray-600);margin-bottom:14px;'},'Archive this inspection in Completed Inspections. You can still view and reprint it anytime.'));
+    cc.appendChild(el('button',{style:'background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-family:Sora,sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:48px;',onclick:markComplete},'✅ Mark as Complete'));
+    panel.appendChild(cc);
+  } else {
+    const rc2=el('div',{className:'info-card',style:'border-color:#86efac;'});
+    rc2.appendChild(el('div',{className:'card-title',style:'color:var(--green);'},'Reopen Inspection'));
+    rc2.appendChild(el('button',{style:'background:#fff;border:1.5px solid #86efac;color:var(--green);border-radius:10px;padding:12px 24px;font-family:Sora,sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:48px;',onclick:()=>reopenInsp(currentId)},'↩ Reopen this Inspection'));
+    panel.appendChild(rc2);
+  }
   return panel;
 }
 
-// ─── PRINT ALL ───────────────────────────────────────────────────────────────
-function printAll() {
-  const st = calcStats();
-  const p  = state.prop;
-
-  const statusLabels = { pass:'✓ Pass', flag:'⚠ Flag', fail:'✗ Fail', na:'N/A', '':'—' };
-  const statusColors = {
-    pass: 'background:#e7f6ef;color:#0f7b4e;',
-    flag: 'background:#fef3c7;color:#b45309;',
-    fail: 'background:#fee2e2;color:#b91c1c;',
-    na:   'background:#EEF1F8;color:#9AA3BA;',
-    '':   'background:#EEF1F8;color:#9AA3BA;',
-  };
-  const rowBg = { pass:'#f4fdf8', flag:'#fffdf0', fail:'#fff8f8', na:'', '':'' };
-
-  // Build section HTML
-  let sectionsHTML = '';
-  SECTIONS.forEach(sec => {
-    let itemsHTML = '';
-    sec.items.forEach((item, idx) => {
-      const val   = state.checks[k(sec.id, idx)] || '';
-      const note  = state.notes[k(sec.id, idx)]  || '';
-      const bg    = rowBg[val] ? `background:${rowBg[val]};` : '';
-
-      let subHTML = '';
-      if (item.appliance) {
-        const brand  = state.appliance[kApp(sec.id, idx, 'Brand')]    || '';
-        const model  = state.appliance[kApp(sec.id, idx, 'Model')]    || '';
-        const serial = state.appliance[kApp(sec.id, idx, 'Serial #')] || '';
-        const parts  = [brand && `Brand: ${brand}`, model && `Model: ${model}`, serial && `S/N: ${serial}`].filter(Boolean);
-        if (parts.length) subHTML += `<div style="font-size:10px;color:#5A6482;margin-top:2px;">${parts.join('&nbsp;&nbsp;·&nbsp;&nbsp;')}</div>`;
-      }
-      if (note) subHTML += `<div style="font-size:10px;color:#5A6482;font-style:italic;margin-top:2px;">→ ${note}</div>`;
-
-      itemsHTML += `
-        <div style="display:flex;align-items:flex-start;gap:10px;padding:7px 12px;border-bottom:1px solid #EEF1F8;${bg}">
-          <div style="flex:1;font-size:11px;line-height:1.4;">${item.label}${subHTML}</div>
-          <span style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0;${statusColors[val]}">${statusLabels[val]}</span>
-        </div>`;
+// COMPLETED PANEL
+function renderCompletedPanel() {
+  const panel=el('div',{id:'completed-panel'});
+  if(completedInsp.length===0){
+    const empty=el('div',{className:'info-card',style:'text-align:center;padding:48px 24px;'});
+    empty.appendChild(el('div',{style:'font-size:48px;margin-bottom:12px;'},'📋'));
+    empty.appendChild(el('div',{style:'font-family:Sora,sans-serif;font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px;'},'No completed inspections yet'));
+    empty.appendChild(el('div',{style:'font-size:13px;color:var(--gray-400);'},'Finish an inspection and tap "Mark as Complete" — it will appear here.'));
+    panel.appendChild(empty);return panel;
+  }
+  const grid=el('div',{className:'completed-grid'});
+  completedInsp.forEach(insp=>{
+    const d=insp.data||{};const prop=d.prop||{};
+    const st=calcStats(d);
+    const addr=prop.address||insp.address||'Untitled Property';
+    const date=prop.date||insp.updated_at?.slice(0,10)||'';
+    const card=el('div',{className:'completed-card'});
+    card.appendChild(el('div',{className:'completed-card-address'},addr));
+    card.appendChild(el('div',{className:'completed-card-meta'},[
+      prop.inspector&&`Inspector: ${prop.inspector}`,
+      date&&`Date: ${date}`,
+      prop.beds&&`${prop.beds} bd / ${prop.baths||'?'} ba`,
+    ].filter(Boolean).join('  ·  ')));
+    const statRow=el('div',{className:'completed-card-stats'});
+    [{cls:'s-pass',val:st.pass,label:'Pass'},{cls:'s-flag',val:st.flag,label:'Flag'},{cls:'s-fail',val:st.fail,label:'Fail'}].forEach(({cls,val,label})=>{
+      const s=el('div',{className:`cc-stat ${cls}`});
+      s.appendChild(el('div',{className:'cc-stat-val'},String(val)));
+      s.appendChild(el('div',{className:'cc-stat-label'},label));
+      statRow.appendChild(s);
     });
-
-    const comment = state.sectionComments[sec.id] || '';
-    if (comment) {
-      itemsHTML += `<div style="padding:7px 12px;background:#F7F8FC;border-top:1px dashed #DDE3F0;font-size:10px;color:#5A6482;font-style:italic;">📝 ${comment}</div>`;
-    }
-
-    sectionsHTML += `
-      <div style="margin-bottom:20px;page-break-inside:avoid;">
-        <div style="font-family:'Sora',sans-serif;font-size:13px;font-weight:800;color:#fff;background:#142878;padding:7px 12px;border-radius:6px 6px 0 0;">
-          ${sec.icon} ${sec.label}
-        </div>
-        <div style="border:1px solid #DDE3F0;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">
-          ${itemsHTML}
-        </div>
-      </div>`;
+    card.appendChild(statRow);
+    const actions=el('div',{className:'completed-card-actions'});
+    actions.appendChild(el('button',{className:'cc-btn primary',onclick:()=>switchTo(insp.id)},'View'));
+    actions.appendChild(el('button',{className:'cc-btn',onclick:()=>{
+      const saved=state,savedId=currentId;
+      state={...defaultState(),...insp.data};
+      printAll();
+      state=saved;currentId=savedId;
+    }},'🖨 Print'));
+    actions.appendChild(el('button',{className:'cc-btn',onclick:()=>reopenInsp(insp.id)},'Reopen'));
+    card.appendChild(actions);grid.appendChild(card);
   });
-
-  // Signature block
-  const sigCols = ['Inspector Signature', 'Owner / Representative Signature', 'Print Name', 'Date'];
-  const sigHTML = sigCols.map(lbl => `
-    <div style="border-top:1px solid #1A2340;padding-top:6px;">
-      <div style="font-family:'Sora',sans-serif;font-size:9px;color:#9AA3BA;text-transform:uppercase;letter-spacing:1px;">${lbl}</div>
-    </div>`).join('');
-
-  // Full document
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>NPM Inspection – ${p.address || 'Report'}</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-  body { font-family:'DM Sans',sans-serif; font-size:12px; color:#1A2340; padding:28px 32px; max-width:900px; margin:0 auto; }
-  @media print { body { padding:0; } }
-</style>
-</head>
-<body>
-
-<!-- Header -->
-<div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid #142878;padding-bottom:12px;margin-bottom:18px;">
-  <div>
-    <div style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#00A0DC;margin-bottom:3px;">Newera Property Management</div>
-    <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#142878;">Property Walkthrough Checklist</div>
-  </div>
-  <div style="text-align:right;font-size:11px;color:#5A6482;line-height:1.8;">
-    ${p.date ? `<strong>Date:</strong> ${p.date}<br>` : ''}
-    <strong>Inspector:</strong> ${p.inspector || '—'}
-  </div>
-</div>
-
-<!-- Property Info -->
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px 20px;background:#F7F8FC;border:1px solid #DDE3F0;border-radius:8px;padding:14px 16px;margin-bottom:20px;">
-  <div style="grid-column:1/-1;">
-    <div style="font-family:'Sora',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9AA3BA;margin-bottom:2px;">Address</div>
-    <div style="font-size:13px;font-weight:600;">${p.address || '—'}</div>
-  </div>
-  ${[['Owner', p.owner],['Year Built', p.yearBuilt],['Bedrooms', p.beds],['Bathrooms', p.baths]].map(([lbl,val]) => `
-  <div>
-    <div style="font-family:'Sora',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9AA3BA;margin-bottom:2px;">${lbl}</div>
-    <div style="font-size:13px;font-weight:600;">${val || '—'}</div>
-  </div>`).join('')}
-</div>
-
-<!-- Summary Stats -->
-<div style="background:#142878;border-radius:8px;padding:16px 18px;margin-bottom:20px;color:#fff;">
-  <div style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#00A0DC;margin-bottom:12px;">Inspection Summary</div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:${state.summary ? '14px' : '0'};">
-    <div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#fff;">${st.total}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Total</div></div>
-    <div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#6ee7b7;">${st.pass}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Passed</div></div>
-    <div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#fcd34d;">${st.flag}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Flagged</div></div>
-    <div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#fca5a5;">${st.fail}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Failed</div></div>
-  </div>
-  ${state.summary ? `
-  <div style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.6);margin-bottom:6px;">Overall Recommendation</div>
-  <div style="font-size:11px;color:rgba(255,255,255,0.9);line-height:1.6;white-space:pre-wrap;">${state.summary}</div>` : ''}
-</div>
-
-<!-- Sections -->
-${sectionsHTML}
-
-<!-- Signatures -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:28px;padding-top:16px;border-top:1px solid #DDE3F0;">
-  ${sigHTML}
-</div>
-
-<script>
-  // Auto-print once fonts load, then close
-  document.fonts.ready.then(() => {
-    setTimeout(() => { window.print(); }, 300);
-  });
-  window.onafterprint = () => window.close();
-<\/script>
-</body>
-</html>`;
-
-  const win = window.open('', '_blank');
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+  panel.appendChild(grid);return panel;
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-buildNav();
-updateProgress();
-renderContent();
+// ── PRINT ─────────────────────────────────────────────────────────────────────
+function printAll() {
+  const st=calcStats();const p=state.prop;
+  const SL={pass:'✓ Pass',flag:'⚠ Flag',fail:'✗ Fail',na:'N/A','':'—'};
+  const SC={pass:'background:#e7f6ef;color:#0f7b4e;',flag:'background:#fef3c7;color:#b45309;',fail:'background:#fee2e2;color:#b91c1c;',na:'background:#EEF1F8;color:#9AA3BA;','':'background:#EEF1F8;color:#9AA3BA;'};
+  const RB={pass:'#f4fdf8',flag:'#fffdf0',fail:'#fff8f8',na:'',''  :''};
+  let sHTML='';
+  SECTIONS.forEach(sec=>{
+    let iHTML='';
+    sec.items.forEach((item,idx)=>{
+      const val=state.checks[k(sec.id,idx)]||'';
+      const note=state.notes[k(sec.id,idx)]||'';
+      const bg=RB[val]?`background:${RB[val]};`:'';
+      let sub='';
+      if(item.appliance){
+        const br=state.appliance[kApp(sec.id,idx,'Brand')]||'';
+        const mo=state.appliance[kApp(sec.id,idx,'Model')]||'';
+        const sn=state.appliance[kApp(sec.id,idx,'Serial #')]||'';
+        const parts=[br&&`Brand: ${br}`,mo&&`Model: ${mo}`,sn&&`S/N: ${sn}`].filter(Boolean);
+        if(parts.length)sub+=`<div style="font-size:10px;color:#5A6482;margin-top:2px;">${parts.join(' · ')}</div>`;
+      }
+      if(note)sub+=`<div style="font-size:10px;color:#5A6482;font-style:italic;margin-top:2px;">→ ${note}</div>`;
+      iHTML+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 12px;border-bottom:1px solid #EEF1F8;${bg}"><div style="flex:1;font-size:11px;line-height:1.4;">${item.label}${sub}</div><span style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0;${SC[val]}">${SL[val]}</span></div>`;
+    });
+    const cmt=state.sectionComments[sec.id]||'';
+    if(cmt)iHTML+=`<div style="padding:7px 12px;background:#F7F8FC;border-top:1px dashed #DDE3F0;font-size:10px;color:#5A6482;font-style:italic;">📝 ${cmt}</div>`;
+    sHTML+=`<div style="margin-bottom:20px;page-break-inside:avoid;"><div style="font-family:'Sora',sans-serif;font-size:13px;font-weight:800;color:#fff;background:#142878;padding:7px 12px;border-radius:6px 6px 0 0;">${sec.icon} ${sec.label}</div><div style="border:1px solid #DDE3F0;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">${iHTML}</div></div>`;
+  });
+  const sigH=['Inspector Signature','Owner / Representative Signature','Print Name','Date'].map(l=>`<div style="border-top:1px solid #1A2340;padding-top:6px;"><div style="font-family:'Sora',sans-serif;font-size:9px;color:#9AA3BA;text-transform:uppercase;letter-spacing:1px;">${l}</div></div>`).join('');
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>NPM Inspection – ${p.address||'Report'}</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,600&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}body{font-family:'DM Sans',sans-serif;font-size:12px;color:#1A2340;padding:28px 32px;max-width:900px;margin:0 auto;}@media print{body{padding:0;}}</style>
+</head><body>
+<div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid #142878;padding-bottom:12px;margin-bottom:18px;">
+<div><div style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#00A0DC;margin-bottom:3px;">Newera Property Management</div><div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:#142878;">Property Walkthrough Checklist</div></div>
+<div style="text-align:right;font-size:11px;color:#5A6482;line-height:1.8;">${p.date?`<strong>Date:</strong> ${p.date}<br>`:''}<strong>Inspector:</strong> ${p.inspector||'—'}</div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px 20px;background:#F7F8FC;border:1px solid #DDE3F0;border-radius:8px;padding:14px 16px;margin-bottom:20px;">
+<div style="grid-column:1/-1;"><div style="font-family:'Sora',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9AA3BA;margin-bottom:2px;">Address</div><div style="font-size:13px;font-weight:600;">${p.address||'—'}</div></div>
+${[['Owner',p.owner],['Year Built',p.yearBuilt],['Bedrooms',p.beds],['Bathrooms',p.baths]].map(([l,v])=>`<div><div style="font-family:'Sora',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9AA3BA;margin-bottom:2px;">${l}</div><div style="font-size:13px;font-weight:600;">${v||'—'}</div></div>`).join('')}
+</div>
+<div style="background:#142878;border-radius:8px;padding:16px 18px;margin-bottom:20px;color:#fff;">
+<div style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#00A0DC;margin-bottom:12px;">Inspection Summary</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;${state.summary?'margin-bottom:14px;':''}">
+<div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#fff;">${st.total}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Total</div></div>
+<div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#6ee7b7;">${st.pass}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Passed</div></div>
+<div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#fcd34d;">${st.flag}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Flagged</div></div>
+<div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:#fca5a5;">${st.fail}</div><div style="font-family:'Sora',sans-serif;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Failed</div></div>
+</div>${state.summary?`<div style="font-family:'Sora',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.6);margin-bottom:6px;">Overall Recommendation</div><div style="font-size:11px;color:rgba(255,255,255,0.9);line-height:1.6;white-space:pre-wrap;">${state.summary}</div>`:''}
+</div>
+${sHTML}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:28px;padding-top:16px;border-top:1px solid #DDE3F0;">${sigH}</div>
+<script>document.fonts.ready.then(()=>{setTimeout(()=>{window.print();},300);});window.onafterprint=()=>window.close();<\/script>
+</body></html>`;
+  const win=window.open('','_blank');
+  win.document.open();win.document.write(html);win.document.close();
+}
 </script>
 </body>
 </html>

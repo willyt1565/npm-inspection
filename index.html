@@ -315,7 +315,10 @@ window.onerror = function(msg, src, line) {
 const SB_URL = 'https://bqptmeepsiudlqldznwv.supabase.co';
 const SB_KEY = 'sb_publishable_zftwVgpgRNNAVYZtASRVrQ_1mH84RSS';
 const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
-setTimeout(function() { showScreen('auth'); }, 6000);
+
+// Fallback timer — stored so we can cancel it when auth fires
+let initTimeout = setTimeout(function() { showScreen('auth'); }, 8000);
+let sessionHandled = false;
 
 // ── SECTIONS ──────────────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -567,7 +570,6 @@ function switchTo(id) {
 
 // ── SESSION INIT ──────────────────────────────────────────────────────────────
 async function initSession(user) {
-  if (currentUser) return; // prevent double-fire from onAuthStateChange
   currentUser = user;
   showScreen('loading');
 
@@ -642,8 +644,15 @@ function showScreen(which) {
 }
 
 sb.auth.onAuthStateChange(async (event, session) => {
-  if (session?.user) await initSession(session.user);
-  else { currentUser=null; showScreen('auth'); }
+  clearTimeout(initTimeout); // always cancel fallback timer when auth fires
+  if (session?.user && !sessionHandled) {
+    sessionHandled = true;
+    await initSession(session.user);
+  } else if (!session?.user) {
+    sessionHandled = false;
+    currentUser = null;
+    showScreen('auth');
+  }
 });
 
 // ── STATS ─────────────────────────────────────────────────────────────────────

@@ -653,10 +653,7 @@ async function initSession(user) {
     document.getElementById('user-avatar').textContent   = initials;
     document.getElementById('user-name-el').textContent  = name;
     document.getElementById('user-email-el').textContent = user.email;
-
-    // Store access token for direct REST calls
-    const { data: sessionData } = await sb.auth.getSession();
-    accessToken = sessionData?.session?.access_token || null;
+    // accessToken is already set by handleAuth or onAuthStateChange before this runs
 
     setStep('Loading your inspections…');
     await loadAll();
@@ -694,12 +691,14 @@ function showScreen(which) {
 }
 
 sb.auth.onAuthStateChange(async (event, session) => {
-  clearTimeout(initTimeout); // always cancel fallback timer when auth fires
+  clearTimeout(initTimeout);
   if (session?.user && !sessionHandled) {
     sessionHandled = true;
+    if (session.access_token) accessToken = session.access_token;
     await initSession(session.user);
   } else if (!session?.user) {
     sessionHandled = false;
+    accessToken = null;
     currentUser = null;
     showScreen('auth');
   }

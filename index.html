@@ -486,12 +486,24 @@ async function handleAuth() {
   if (authTab==='signup'&&!name) { showAuthError('Please enter your name.'); return; }
   btn.disabled = true;
   btn.textContent = authTab==='signin'?'Signing in…':'Creating account…';
+
+  // 10-second timeout so we never hang silently
+  const timeout = new Promise((_,reject) =>
+    setTimeout(()=>reject(new Error('Connection timed out. Check your internet and try again. Your Supabase project may be paused — check your Supabase dashboard.')), 10000)
+  );
+
   try {
     if (authTab==='signin') {
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await Promise.race([
+        sb.auth.signInWithPassword({ email, password }),
+        timeout
+      ]);
       if (error) throw error;
     } else {
-      const { data, error } = await sb.auth.signUp({ email, password, options:{ data:{ full_name:name } } });
+      const { data, error } = await Promise.race([
+        sb.auth.signUp({ email, password, options:{ data:{ full_name:name } } }),
+        timeout
+      ]);
       if (error) throw error;
       if (data.user && !data.session) {
         showAuthError('Check your email to confirm your account, then sign in.');

@@ -487,28 +487,29 @@ async function handleAuth() {
   btn.disabled = true;
   btn.textContent = authTab==='signin'?'Signing in…':'Creating account…';
 
-  // 10-second timeout so we never hang silently
-  const timeout = new Promise((_,reject) =>
-    setTimeout(()=>reject(new Error('Connection timed out. Check your internet and try again. Your Supabase project may be paused — check your Supabase dashboard.')), 10000)
+  const connTimeout = new Promise((_,reject) =>
+    setTimeout(()=>reject(new Error('Connection timed out after 10s. Your Supabase project may be paused — check your Supabase dashboard and resume it, then try again.')), 10000)
   );
 
   try {
     if (authTab==='signin') {
-      const { error } = await Promise.race([
+      const { data, error } = await Promise.race([
         sb.auth.signInWithPassword({ email, password }),
-        timeout
+        connTimeout
       ]);
       if (error) throw error;
+      if (data?.user) await initSession(data.user);
     } else {
       const { data, error } = await Promise.race([
         sb.auth.signUp({ email, password, options:{ data:{ full_name:name } } }),
-        timeout
+        connTimeout
       ]);
       if (error) throw error;
-      if (data.user && !data.session) {
+      if (data?.user && !data?.session) {
         showAuthError('Check your email to confirm your account, then sign in.');
         btn.disabled=false; btn.textContent='Create Account'; return;
       }
+      if (data?.user) await initSession(data.user);
     }
   } catch(e) {
     showAuthError(e.message||'Authentication failed.');
@@ -603,11 +604,16 @@ async function initSession(user) {
     document.getElementById('user-email-el').textContent = user.email;
 
     setStep('Loading your inspections…');
-    const { data, error: loadErr } = await sb
-      .from('inspections')
-      .select('id,address,inspector_name,status,data,created_at,updated_at')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false });
+    const dbTimeout = new Promise((_,reject) =>
+      setTimeout(()=>reject(new Error('Database timed out after 15s. Check that your Supabase project is active and the inspections table exists.')), 15000)
+    );
+    const { data, error: loadErr } = await Promise.race([
+      sb.from('inspections')
+        .select('id,address,inspector_name,status,data,created_at,updated_at')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false }),
+      dbTimeout
+    ]);
 
     if (loadErr) throw new Error('DB query failed: ' + loadErr.message);
 

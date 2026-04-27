@@ -567,41 +567,55 @@ function switchTo(id) {
 
 // ── SESSION INIT ──────────────────────────────────────────────────────────────
 async function initSession(user) {
+  if (currentUser) return; // prevent double-fire from onAuthStateChange
   currentUser = user;
   showScreen('loading');
+
+  const setStep = (msg) => {
+    const ls = document.getElementById('loading-screen');
+    ls.innerHTML = '<div style="text-align:center;padding:32px;max-width:420px;">'
+      + '<div class="spinner"></div>'
+      + '<div style="font-family:Sora,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--sky);margin-top:20px;">Newera Property Management</div>'
+      + '<div style="font-family:Sora,sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:8px;">' + msg + '</div>'
+      + '</div>';
+  };
+
   try {
+    setStep('Authenticating…');
     const name     = user.user_metadata?.full_name || user.email.split('@')[0];
     const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    document.getElementById('user-avatar').textContent    = initials;
-    document.getElementById('user-name-el').textContent   = name;
-    document.getElementById('user-email-el').textContent  = user.email;
+    document.getElementById('user-avatar').textContent   = initials;
+    document.getElementById('user-name-el').textContent  = name;
+    document.getElementById('user-email-el').textContent = user.email;
 
-    // Load inspections with explicit error check
+    setStep('Loading your inspections…');
     const { data, error: loadErr } = await sb
       .from('inspections')
       .select('id,address,inspector_name,status,data,created_at,updated_at')
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false });
 
-    if (loadErr) throw new Error('Could not load inspections: ' + loadErr.message);
+    if (loadErr) throw new Error('DB query failed: ' + loadErr.message);
 
     activeInsp    = (data||[]).filter(i => i.status === 'active');
     completedInsp = (data||[]).filter(i => i.status === 'completed');
 
     if (activeInsp.length === 0) {
+      setStep('Creating your first inspection…');
       const defData = defaultState();
       defData.prop.inspector = name;
       const { data: newRow, error: insertErr } = await sb
         .from('inspections')
         .insert({ user_id: user.id, address: 'New Inspection', inspector_name: name, status: 'active', data: defData })
         .select().single();
-      if (insertErr) throw new Error('Could not create inspection: ' + insertErr.message);
+      if (insertErr) throw new Error('Insert failed: ' + insertErr.message);
       activeInsp.unshift(newRow);
       currentId = newRow.id;
     } else {
       currentId = activeInsp[0].id;
     }
 
+    setStep('Setting up your workspace…');
     const insp = activeInsp.find(i => i.id === currentId);
     state       = insp?.data ? { ...defaultState(), ...insp.data } : defaultState();
     isCompleted = false;
@@ -610,20 +624,15 @@ async function initSession(user) {
     buildSidebar(); updateProgress(); renderContent();
 
   } catch(err) {
-    // Show the error on the loading screen instead of hanging
     document.getElementById('loading-screen').innerHTML =
       '<div style="text-align:center;padding:32px;max-width:440px;">'
-      + '<div style="font-family:Sora,sans-serif;font-size:13px;color:#fca5a5;font-weight:700;margin-bottom:12px;">⚠ Login Error</div>'
-      + '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.7;margin-bottom:8px;">' + (err.message||String(err)) + '</div>'
-      + '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:24px;">Check that your Supabase table exists and RLS policies are correct.</div>'
-      + '<button onclick="location.reload()" style="background:#00A0DC;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-family:Sora,sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-right:10px;">Reload</button>'
-      + '<button onclick="supabase_signout()" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:12px 24px;font-family:Sora,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Sign Out</button>'
+      + '<div style="font-family:Sora,sans-serif;font-size:13px;color:#fca5a5;font-weight:700;margin-bottom:12px;">⚠ Setup Error</div>'
+      + '<div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.7;margin-bottom:8px;">' + (err.message || String(err)) + '</div>'
+      + '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:24px;">Verify the inspections table exists in Supabase and RLS is enabled.</div>'
+      + '<button onclick="sb.auth.signOut()" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:12px 24px;font-family:Sora,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Sign Out &amp; Retry</button>'
       + '</div>';
-    document.getElementById('loading-screen').classList.remove('hidden');
   }
 }
-
-function supabase_signout() { sb.auth.signOut(); }
 
 function showScreen(which) {
   document.getElementById('loading-screen').classList.toggle('hidden', which!=='loading');
